@@ -57,6 +57,12 @@
       color: #34d399;
       border-bottom: 2px solid #10b981;
     }
+    input[type=range] { -webkit-appearance: none; appearance: none; background: #1e293b; height: 6px; border-radius: 999px; touch-action: pan-y; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: #10b981; border: 3px solid #0b0f17; box-shadow: 0 0 0 1px #10b981; }
+    input[type=range]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: #10b981; border: 3px solid #0b0f17; }
+    input[type=range]:disabled { cursor: not-allowed; }
+    html { -webkit-text-size-adjust: 100%; }
+    @media print { header, aside, #data-check, .nav-tab, #toast { display: none !important; } body { background: #fff; } }
     /* Custom scrollbar */
     ::-webkit-scrollbar {
       width: 6px;
@@ -76,71 +82,53 @@
 </head>
 <body class="min-h-screen flex flex-col antialiased selection:bg-emerald-500 selection:text-black">
 
-  <!-- Milestone Banner: Turning 40 on Saturday -->
-  <aside aria-label="Milestone notification" class="bg-gradient-to-r from-emerald-950 via-slate-900 to-cyan-950 border-b border-emerald-500/20 px-4 py-2.5 text-xs sm:text-sm">
+  <!-- Mode banner (filled by JS) -->
+  <aside id="mode-banner" aria-live="polite" class="border-b px-3 sm:px-4 py-2 text-xs sm:text-sm bg-amber-950/60 border-amber-500/30">
     <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
-      <div class="flex items-center gap-2">
-        <span class="flex h-2.5 w-2.5 relative">
-          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-        </span>
-        <span class="font-medium text-emerald-300">Milestone Alert:</span>
-        <span class="text-slate-200">Turning 40 this Saturday! Entering the 4th Decade Health Transition Window.</span>
+      <div class="flex items-start gap-2 min-w-0">
+        <span id="mode-dot" class="mt-1 h-2.5 w-2.5 rounded-full bg-amber-400 shrink-0"></span>
+        <span><strong id="mode-banner-title" class="text-amber-300">Demo mode:</strong> <span id="mode-banner-text" class="text-slate-200"></span></span>
       </div>
-      <div class="flex items-center gap-2">
-        <span class="hidden md:inline text-slate-400">Pace of aging benchmark: Active</span>
-        <button id="quick-doctor-btn" class="px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 font-medium transition flex items-center gap-1 border border-emerald-500/30">
-          <span>View 40th Physical Guide</span>
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-        </button>
-      </div>
+      <button id="quick-doctor-btn" class="px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 font-medium transition border border-emerald-500/30 whitespace-nowrap">Doctor summary &rarr;</button>
     </div>
   </aside>
 
   <!-- Navigation Bar -->
-  <header class="border-b border-slate-800 bg-slate-950/70 sticky top-0 z-30 backdrop-blur-md">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">
-          <svg class="w-5 h-5 text-slate-950 font-bold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <header class="border-b border-slate-800 bg-slate-950/90 sm:sticky top-0 z-30 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2 sm:py-0 sm:h-16 flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="w-9 h-9 sm:w-10 sm:h-10 shrink-0 rounded-xl bg-gradient-to-tr from-emerald-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+          <svg class="w-5 h-5 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
         </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <span class="text-lg font-bold tracking-tight text-white">Decade<span class="text-emerald-400">Shift</span></span>
-            <span class="text-[10px] uppercase font-mono tracking-widest px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">v1.0 SDLC</span>
-          </div>
-          <p class="text-xs text-slate-400 hidden sm:block">Wearable Biological Velocity & Milestone Engine</p>
+        <div class="min-w-0">
+          <span class="text-lg font-bold tracking-tight text-white">Decade<span class="text-emerald-400">Shift</span></span>
+          <p class="text-xs text-slate-400 hidden md:block">Wearable Biological Velocity &amp; Milestone Engine</p>
         </div>
       </div>
 
-      <!-- Sync Status & Profile Selector -->
-      <div class="flex items-center gap-3">
-        <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs">
-          <svg class="w-4 h-4 text-emerald-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-          <span class="text-slate-300">Apple Health & Google Fit Synced</span>
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+      <div class="flex items-center gap-2 flex-wrap justify-end w-full sm:w-auto">
+        <!-- Demo / Actual toggle -->
+        <div role="group" aria-label="Data mode" class="flex rounded-lg bg-slate-900 border border-slate-700 p-0.5 text-xs font-semibold flex-1 sm:flex-none">
+          <button id="mode-demo-btn" class="flex-1 sm:flex-none px-3 py-2 sm:py-1.5 rounded-md transition">Demo</button>
+          <button id="mode-actual-btn" class="flex-1 sm:flex-none px-3 py-2 sm:py-1.5 rounded-md transition">Actual</button>
         </div>
 
-        <select id="preset-selector" class="bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-emerald-500">
-          <option value="turning40-desk">Profile: Turning 40 (Desk Pro)</option>
-          <option value="turning40-athlete">Profile: Turning 40 (Endurance Athlete)</option>
-          <option value="thirties-prevention">Profile: Entering 30s (Prevention)</option>
-          <option value="fifties-rebound">Profile: Age 52 (Longevity Rebound)</option>
+        <select id="preset-selector" aria-label="Demo profile" class="bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-lg px-2 py-2 sm:py-1.5 focus:outline-none focus:border-emerald-500 max-w-[11rem]">
+          <option value="turning40-desk">Turning 40 (Desk Pro)</option>
+          <option value="turning40-athlete">Turning 40 (Endurance Athlete)</option>
+          <option value="thirties-prevention">Entering 30s (Prevention)</option>
+          <option value="fifties-rebound">Age 52 (Longevity Rebound)</option>
         </select>
 
-        
-        <button id="open-import-modal-btn" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 shadow transition flex items-center gap-1.5">
+        <button id="open-import-modal-btn" class="px-3 py-2 sm:py-1.5 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 shadow transition flex items-center gap-1.5">
           <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-          <span class="hidden sm:inline">Import Real Health Data</span>
-          <span class="sm:hidden">Import</span>
+          <span>Load my data</span>
         </button>
 
-        <button id="export-pdf-header-btn" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white shadow transition flex items-center gap-1.5">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-          <span class="hidden sm:inline">Export Doctor Report</span>
-          <span class="sm:hidden">Report</span>
+        <button id="export-pdf-header-btn" class="hidden sm:flex px-3 py-1.5 text-xs font-medium rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white shadow transition items-center gap-1.5">
+          <span>Doctor report</span>
         </button>
       </div>
     </div>
@@ -173,95 +161,73 @@
   <!-- Main Container -->
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-    <!-- Live Ingestion Status & Active Data Source Card -->
-    <div id="data-source-banner" class="glass-card rounded-2xl p-4 border border-blue-500/30 bg-gradient-to-r from-slate-950 via-blue-950/30 to-slate-950 flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-blue-950 border border-blue-500/40 flex items-center justify-center text-blue-400 shadow-lg shadow-blue-500/10">
-          <svg class="w-5 h-5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+    <!-- Data check: shows exactly which numbers are loaded so you can compare with Google Health / Fitbit / Apple Health -->
+    <section id="data-check" class="glass-card rounded-2xl p-4 sm:p-5 space-y-3">
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div class="min-w-0">
+          <div class="flex flex-wrap items-center gap-2">
+            <h2 class="text-sm font-semibold text-white">Data check</h2>
+            <span id="dc-status" class="px-2 py-0.5 rounded text-[11px] font-mono font-bold border"></span>
+          </div>
+          <p id="dc-detail" class="text-xs text-slate-400 mt-1"></p>
         </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <span class="text-xs font-semibold text-slate-400">ACTIVE TELEMETRY STREAM:</span>
-            <span id="active-source-badge" class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-blue-950 text-blue-300 border border-blue-800">Google Health / WearOS Stream</span>
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-          </div>
-          <div class="text-xs text-slate-300 mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1">
-            <span>Ingested: <strong id="stream-samples-count" class="text-emerald-400 font-mono">1,420 PPG points</strong></span>
-            <span>Cardiorespiratory Stream: <strong id="stream-vo2-status" class="text-cyan-400 font-mono">Verified</strong></span>
-            <span>Algorithm: <strong class="text-slate-200">Nonlinear Biological Hazard Model v2.4</strong></span>
-          </div>
+        <div class="flex gap-2 w-full sm:w-auto">
+          <button id="dc-load-btn" class="flex-1 sm:flex-none px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition">Load my data</button>
+          <button id="dc-clear-btn" class="hidden px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-medium transition">Clear</button>
         </div>
       </div>
-      <div class="flex items-center gap-2">
-        <button id="view-raw-telemetry-btn" class="px-3 py-1.5 rounded-lg bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 text-xs font-medium transition flex items-center gap-1.5">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-          <span>Compare Pulled vs Baseline Data</span>
-        </button>
-      </div>
-    </div>
-
+      <div id="dc-rows" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2"></div>
+      <p id="dc-hint" class="text-[11px] text-slate-500 leading-relaxed"></p>
+    </section>
 
     <!-- KPI Summary Cards -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      <!-- Biological Age -->
-      <div class="glass-card rounded-2xl p-4 sm:p-5 relative overflow-hidden border-emerald-500/20">
-        <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <div class="glass-card rounded-2xl p-3 sm:p-5 relative overflow-hidden border-emerald-500/20">
+        <div class="flex items-center justify-between gap-1 text-xs text-slate-400 mb-2">
           <span>Biological Age</span>
-          <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-950 text-emerald-400 border border-emerald-800">-3.2 Yrs</span>
+          <span id="kpi-bio-pill" class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-slate-800 text-slate-300 border-slate-700">&mdash;</span>
         </div>
-        <div class="flex items-baseline gap-2">
-          <span id="metric-bio-age" class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight font-mono">36.8</span>
-          <span class="text-xs text-slate-400">vs 40.0 Chrono</span>
+        <div class="flex items-baseline gap-2 flex-wrap">
+          <span id="metric-bio-age" class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight font-mono">&mdash;</span>
+          <span id="kpi-bio-chrono" class="text-xs text-slate-400"></span>
         </div>
-        <div class="mt-3 flex items-center gap-1.5 text-xs text-emerald-400">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
-          <span>Top 18th percentile for age 40</span>
-        </div>
+        <div id="kpi-bio-note" class="mt-3 text-xs text-slate-300"></div>
       </div>
 
-      <!-- Pace of Aging -->
-      <div class="glass-card rounded-2xl p-4 sm:p-5 relative overflow-hidden border-cyan-500/20">
-        <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
+      <div class="glass-card rounded-2xl p-3 sm:p-5 relative overflow-hidden border-cyan-500/20">
+        <div class="flex items-center justify-between gap-1 text-xs text-slate-400 mb-2">
           <span>Pace of Aging</span>
-          <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-cyan-950 text-cyan-300 border border-cyan-800">Decelerated</span>
+          <span id="kpi-pace-pill" class="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-slate-800 text-slate-300 border-slate-700">&mdash;</span>
         </div>
-        <div class="flex items-baseline gap-2">
-          <span id="metric-pace-val" class="text-3xl sm:text-4xl font-extrabold text-cyan-400 tracking-tight font-mono">0.84</span>
+        <div class="flex items-baseline gap-2 flex-wrap">
+          <span id="metric-pace-val" class="text-3xl sm:text-4xl font-extrabold text-cyan-400 tracking-tight font-mono">&mdash;</span>
           <span class="text-xs text-slate-400">yrs / cal yr</span>
         </div>
-        <div class="mt-3 flex items-center gap-1.5 text-xs text-slate-300">
-          <span>Aging 58 days slower per year</span>
-        </div>
+        <div id="kpi-pace-note" class="mt-3 text-xs text-slate-300"></div>
       </div>
 
-      <!-- Cardiorespiratory Reserve (VO2 Max) -->
-      <div class="glass-card rounded-2xl p-4 sm:p-5 relative overflow-hidden">
-        <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
-          <span>Cardiorespiratory (VO2)</span>
-          <span id="vo2-tier" class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-300">Excellent</span>
+      <div class="glass-card rounded-2xl p-3 sm:p-5 relative overflow-hidden">
+        <div class="flex items-center justify-between gap-1 text-xs text-slate-400 mb-2">
+          <span>VO2 Max</span>
+          <span id="vo2-tier" class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-300">&mdash;</span>
         </div>
-        <div class="flex items-baseline gap-2">
-          <span id="metric-vo2-val" class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight font-mono">46.5</span>
+        <div class="flex items-baseline gap-2 flex-wrap">
+          <span id="metric-vo2-val" class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight font-mono">&mdash;</span>
           <span class="text-xs text-slate-400">ml/kg/min</span>
         </div>
-        <div class="mt-3 flex items-center gap-1.5 text-xs text-emerald-400">
-          <span>+8.2 ml above 40yo average</span>
-        </div>
+        <div id="kpi-vo2-note" class="mt-3 text-xs text-slate-300"></div>
       </div>
 
-      <!-- Neuromuscular Mobility Index -->
-      <div class="glass-card rounded-2xl p-4 sm:p-5 relative overflow-hidden">
-        <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
-          <span>Gait & Autonomic Score</span>
-          <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-950 text-emerald-400 border border-emerald-800">Optimal</span>
+      <div class="glass-card rounded-2xl p-3 sm:p-5 relative overflow-hidden">
+        <div class="flex items-center justify-between gap-1 text-xs text-slate-400 mb-2">
+          <span>Night HRV</span>
+          <span id="kpi-hrv-tier" class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-300">&mdash;</span>
         </div>
-        <div class="flex items-baseline gap-2">
-          <span id="metric-mobility-val" class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight font-mono">92</span>
-          <span class="text-xs text-slate-400">/ 100 Index</span>
+        <div class="flex items-baseline gap-2 flex-wrap">
+          <span id="metric-mobility-val" class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight font-mono">&mdash;</span>
+          <span class="text-xs text-slate-400">ms</span>
         </div>
-        <div class="mt-3 flex items-center gap-1.5 text-xs text-slate-300">
-          <span>Double-support: 28.2% (Low risk)</span>
-        </div>
+        <div id="kpi-hrv-note" class="mt-3 text-xs text-slate-300"></div>
       </div>
     </div>
 
@@ -276,10 +242,12 @@
           <div class="flex items-center justify-between border-b border-slate-800 pb-3">
             <div>
               <h2 class="font-semibold text-white text-base">Wearable Signal Telemetry</h2>
-              <p class="text-xs text-slate-400">Simulate or adjust your Apple/Fitbit sensors</p>
+              <p class="text-xs text-slate-400">Demo: drag to explore how each signal moves the score</p>
             </div>
             <button id="reset-sim-btn" class="text-xs text-slate-400 hover:text-emerald-400 underline transition">Reset</button>
           </div>
+
+          <div id="slider-lock-note" class="hidden text-xs text-slate-400 bg-slate-900 border border-slate-800 rounded-lg p-2.5">Sliders are for Demo mode. In Actual mode the numbers come only from the data you load.</div>
 
           <!-- Slider 1: VO2 Max -->
           <div class="space-y-1.5">
@@ -312,7 +280,7 @@
           <!-- Slider 3: Walking Double Support Time % -->
           <div class="space-y-1.5">
             <div class="flex justify-between text-xs">
-              <span class="text-slate-300 font-medium">Apple Watch Double Support %</span>
+              <span class="text-slate-300 font-medium">Walking Double Support %</span>
               <span id="slider-ds-val" class="font-mono text-emerald-400 font-bold">28.0%</span>
             </div>
             <input type="range" id="input-ds" min="20" max="42" step="0.5" value="28.0" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500">
@@ -394,7 +362,7 @@
               <div id="gait-status" class="text-sm font-bold text-emerald-400 mt-1">Stable (-2.8 yrs)</div>
             </div>
             <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800 text-center">
-              <div class="text-[11px] text-slate-400">Circadian Dip</div>
+              <div class="text-[11px] text-slate-400">Resting HR Strain</div>
               <div id="circadian-status" class="text-sm font-bold text-cyan-400 mt-1">Normal (-1.9 yrs)</div>
             </div>
           </div>
@@ -406,7 +374,7 @@
       <div class="glass-card rounded-2xl p-5 space-y-4">
         <h2 class="font-semibold text-white text-base">Wearable Biomarker Audit: What Your Sensors Reveal</h2>
         <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs sm:text-sm">
+          <table class="w-full min-w-[720px] text-left text-xs sm:text-sm">
             <thead>
               <tr class="border-b border-slate-800 text-slate-400 text-xs">
                 <th class="pb-3 font-medium">Digital Biomarker</th>
@@ -478,11 +446,11 @@
           <h2 class="text-xl font-bold text-white">The Lifetime Physiological Roadmap</h2>
           <p class="text-xs text-slate-400">Evidence-based clinical priorities and preventative mandates by decade</p>
         </div>
-        <div class="flex rounded-xl bg-slate-900 p-1 border border-slate-800 text-xs font-semibold">
-          <button class="decade-btn px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition" data-decade="20">20s (Reserve)</button>
-          <button class="decade-btn px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition" data-decade="30">30s (Metabolism)</button>
-          <button class="decade-btn px-3 py-1.5 rounded-lg bg-emerald-600 text-white shadow transition" data-decade="40">40s (Milestone ★)</button>
-          <button class="decade-btn px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition" data-decade="50">50s+ (Preservation)</button>
+        <div class="flex w-full sm:w-auto overflow-x-auto rounded-xl bg-slate-900 p-1 border border-slate-800 text-xs font-semibold">
+          <button class="decade-btn whitespace-nowrap shrink-0 px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition" data-decade="20">20s (Reserve)</button>
+          <button class="decade-btn whitespace-nowrap shrink-0 px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition" data-decade="30">30s (Metabolism)</button>
+          <button class="decade-btn whitespace-nowrap shrink-0 px-3 py-1.5 rounded-lg bg-emerald-600 text-white shadow transition" data-decade="40">40s (Milestone ★)</button>
+          <button class="decade-btn whitespace-nowrap shrink-0 px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition" data-decade="50">50s+ (Preservation)</button>
         </div>
       </div>
 
@@ -636,7 +604,7 @@
     <!-- VIEW 4: DOCTOR-READY ANNUAL SUMMARY -->
     <div id="clinical-view" class="view-content hidden space-y-6">
       
-      <div class="glass-card rounded-2xl p-6 sm:p-8 space-y-6 bg-slate-950 border-slate-700">
+      <div class="glass-card rounded-2xl p-4 sm:p-8 space-y-6 bg-slate-950 border-slate-700">
         
         <!-- Header for Clinical Document -->
         <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-5">
@@ -649,7 +617,8 @@
                 <h2 class="text-lg font-bold text-white">Annual Preventative Health & Wearable Telemetry Summary</h2>
                 <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">40th Milestone</span>
               </div>
-              <p class="text-xs text-slate-400">Prepared for Primary Care Physician (PCP) Review • 365-Day Longitudinal Synthesis</p>
+              <p class="text-xs text-slate-400">Prepared for primary care review. Consumer wearable data, not a diagnosis.</p>
+              <p id="doc-demo-note" class="hidden text-xs font-semibold text-amber-300 mt-1">DEMO DATA: simulated values, not a real patient.</p>
             </div>
           </div>
           <div class="flex items-center gap-2">
@@ -662,22 +631,10 @@
 
         <!-- Patient Demographics & Vitals Table -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-xl bg-slate-900/90 border border-slate-800 text-xs">
-          <div>
-            <span class="text-slate-500 block">Patient Chronological Age:</span>
-            <span class="font-semibold text-white text-sm">40.0 Years (Oct 17, 2026)</span>
-          </div>
-          <div>
-            <span class="text-slate-500 block">Biological Age Estimate:</span>
-            <span id="doc-bio-age" class="font-semibold text-emerald-400 text-sm">36.8 Years</span>
-          </div>
-          <div>
-            <span class="text-slate-500 block">Data Capture Density:</span>
-            <span class="font-semibold text-white text-sm">348 Days / Year (95.3%)</span>
-          </div>
-          <div>
-            <span class="text-slate-500 block">Primary Wearable:</span>
-            <span class="font-semibold text-white text-sm">Apple Watch Series 10 / ECG</span>
-          </div>
+          <div><span class="text-slate-500 block">Chronological Age:</span><span id="doc-age" class="font-semibold text-white text-sm">&mdash;</span></div>
+          <div><span class="text-slate-500 block">Biological Age Estimate:</span><span id="doc-bio-age" class="font-semibold text-emerald-400 text-sm">&mdash;</span></div>
+          <div><span class="text-slate-500 block">Data Source:</span><span id="doc-source" class="font-semibold text-white text-sm">&mdash;</span></div>
+          <div><span class="text-slate-500 block">Report Date:</span><span id="doc-date" class="font-semibold text-white text-sm">&mdash;</span></div>
         </div>
 
         <!-- 365-Day Objective Wearable Findings -->
@@ -687,17 +644,17 @@
             <div class="p-3 rounded-lg bg-slate-900 border border-slate-800">
               <span class="text-slate-400 block mb-1">Resting Heart Rate (RHR)</span>
               <div class="text-base font-bold text-white font-mono" id="doc-rhr">56 bpm</div>
-              <span class="text-[11px] text-emerald-400">5th-10th percentile (Athletic)</span>
+              <span id="doc-rhr-note" class="text-[11px] text-slate-400"></span>
             </div>
             <div class="p-3 rounded-lg bg-slate-900 border border-slate-800">
               <span class="text-slate-400 block mb-1">Heart Rate Recovery (HRR 60s)</span>
               <div class="text-base font-bold text-white font-mono" id="doc-hrr">32 bpm drop</div>
-              <span class="text-[11px] text-emerald-400">Normal vagal reactivation</span>
+              <span id="doc-hrr-note" class="text-[11px] text-slate-400"></span>
             </div>
             <div class="p-3 rounded-lg bg-slate-900 border border-slate-800">
               <span class="text-slate-400 block mb-1">Cardio Fitness (VO2 Max)</span>
               <div class="text-base font-bold text-white font-mono" id="doc-vo2">46.5 ml/kg/min</div>
-              <span class="text-[11px] text-emerald-400">High Reserve Tier (Top 15%)</span>
+              <span id="doc-vo2-note" class="text-[11px] text-slate-400"></span>
             </div>
           </div>
         </div>
@@ -707,11 +664,11 @@
           <h2 class="text-sm font-bold text-white uppercase tracking-wider text-slate-300">2. Neuromuscular & Gait Biomechanics</h2>
           <div class="p-4 rounded-lg bg-slate-900 border border-slate-800 text-xs space-y-2">
             <div class="flex justify-between items-center">
-              <span class="text-slate-300 font-medium">Apple Watch Walking Steadiness & Double Support:</span>
+              <span class="text-slate-300 font-medium">Walking Double Support:</span>
               <span id="doc-ds" class="font-mono text-emerald-400 font-bold">28.0% (OK)</span>
             </div>
             <p class="text-slate-400 text-xs leading-relaxed">
-              Longitudinal analysis demonstrates no clinical elevation in double-support time or stride asymmetry. Fall risk index: Very Low (&lt;1%). Neuromuscular reaction times and step frequency remain within youthful decade percentiles.
+              <span id="doc-ds-note"></span>
             </p>
           </div>
         </div>
@@ -720,10 +677,10 @@
         <div class="space-y-3">
           <div class="flex items-center justify-between">
             <h2 class="text-sm font-bold text-white uppercase tracking-wider text-slate-300">3. Suggested Clinical Action Items (Age 40 Intake)</h2>
-            <span class="text-[11px] text-slate-400 font-mono">ICD-10 Z00.00 / CPT 99386</span>
+            
           </div>
 
-          <div class="border border-slate-800 rounded-xl overflow-hidden text-xs">
+          <div class="overflow-x-auto"><div class="min-w-[540px] border border-slate-800 rounded-xl overflow-hidden text-xs">
             <div class="bg-slate-900/90 px-4 py-2 font-semibold text-slate-300 border-b border-slate-800 grid grid-cols-12">
               <span class="col-span-4">Evaluation / Lab Order</span>
               <span class="col-span-3">Rationale</span>
@@ -757,6 +714,7 @@
               </div>
             </div>
           </div>
+          </div>
         </div>
 
         <div class="p-3 bg-slate-900/60 rounded-xl border border-slate-800 text-[11px] text-slate-500 italic">
@@ -777,84 +735,28 @@
           <div>
             <div class="flex items-center gap-2">
               <h2 class="text-lg font-bold text-white">Pulled Wearable Stream vs. Age 40 Population Baseline</h2>
-              <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-cyan-950 text-cyan-300 border border-cyan-800">Verified Raw Ingestion</span>
+              <span id="insp-badge" class="px-2 py-0.5 rounded text-[10px] font-mono border"></span>
             </div>
-            <p class="text-xs text-slate-400 mt-1">Audit the exact metrics retrieved from your device against demographic controls</p>
+            <p class="text-xs text-slate-400 mt-1">The exact numbers in use, against age-40 population medians</p>
           </div>
           <div class="text-xs text-slate-400 font-mono">
-            Ingestion Timestamp: <span id="telemetry-timestamp" class="text-emerald-400">2026-10-14 17:42:09 CDT</span>
+            Loaded: <span id="telemetry-timestamp" class="text-emerald-400"></span>
           </div>
         </div>
 
         <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs sm:text-sm">
+          <table class="w-full min-w-[720px] text-left text-xs sm:text-sm">
             <thead>
               <tr class="border-b border-slate-800 text-slate-400 text-xs">
-                <th class="pb-3 font-semibold">Sensor / Telemetry Metric</th>
-                <th class="pb-3 font-semibold">Google Health / WearOS Source</th>
-                <th class="pb-3 font-semibold text-emerald-400">Pulled Live Value</th>
-                <th class="pb-3 font-semibold text-slate-400">Age 40 Baseline</th>
-                <th class="pb-3 font-semibold">Variance (&Delta;)</th>
-                <th class="pb-3 font-semibold">Algorithm Hazard Weight</th>
+                <th class="pb-3 pr-3 font-semibold">Metric</th>
+                <th class="pb-3 pr-3 font-semibold">Source field</th>
+                <th class="pb-3 pr-3 font-semibold text-emerald-400">Value in use</th>
+                <th class="pb-3 pr-3 font-semibold text-slate-400">Age-40 median</th>
+                <th class="pb-3 pr-3 font-semibold">Variance (&Delta;)</th>
+                <th class="pb-3 font-semibold">Model term</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-800/60 text-slate-300">
-              <tr>
-                <td class="py-3 font-medium text-white flex items-center gap-2">
-                  <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                  <span>Resting Heart Rate (Basal)</span>
-                </td>
-                <td class="py-3 font-mono text-[11px] text-slate-400">com.google.heart_rate.bpm (30-day min)</td>
-                <td class="py-3 font-mono font-bold text-emerald-400 text-sm" id="insp-rhr">61 bpm</td>
-                <td class="py-3 font-mono text-slate-400">66 bpm</td>
-                <td class="py-3 text-emerald-300 font-mono">-5 bpm (-7.6%)</td>
-                <td class="py-3 text-slate-400 font-mono">&beta; = 0.18 (Log-Linear)</td>
-              </tr>
-              <tr>
-                <td class="py-3 font-medium text-white flex items-center gap-2">
-                  <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                  <span>Cardiorespiratory Fitness (VO2)</span>
-                </td>
-                <td class="py-3 font-mono text-[11px] text-slate-400">com.google.fitness.cardio_minutes / GPS</td>
-                <td class="py-3 font-mono font-bold text-emerald-400 text-sm" id="insp-vo2">43.8 ml/kg/min</td>
-                <td class="py-3 font-mono text-slate-400">38.0 ml/kg/min</td>
-                <td class="py-3 text-emerald-300 font-mono">+5.8 ml (+15.3%)</td>
-                <td class="py-3 text-slate-400 font-mono">&beta; = 0.42 (Power 1.35x)</td>
-              </tr>
-              <tr>
-                <td class="py-3 font-medium text-white flex items-center gap-2">
-                  <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                  <span>Heart Rate Recovery (HRR 60s)</span>
-                </td>
-                <td class="py-3 font-mono text-[11px] text-slate-400">com.google.heart_rate.post_workout_drop</td>
-                <td class="py-3 font-mono font-bold text-emerald-400 text-sm" id="insp-hrr">28 bpm drop</td>
-                <td class="py-3 font-mono text-slate-400">24 bpm drop</td>
-                <td class="py-3 text-emerald-300 font-mono">+4 bpm (+16.7%)</td>
-                <td class="py-3 text-slate-400 font-mono">&beta; = 0.22 (Sigmoid Vagal)</td>
-              </tr>
-              <tr>
-                <td class="py-3 font-medium text-white flex items-center gap-2">
-                  <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
-                  <span>Nocturnal HRV (rMSSD)</span>
-                </td>
-                <td class="py-3 font-mono text-[11px] text-slate-400">com.google.heart_rate.variability.rmssd</td>
-                <td class="py-3 font-mono font-bold text-cyan-400 text-sm" id="insp-hrv">49 ms</td>
-                <td class="py-3 font-mono text-slate-400">42 ms</td>
-                <td class="py-3 text-cyan-300 font-mono">+7 ms (+16.7%)</td>
-                <td class="py-3 text-slate-400 font-mono">&beta; = 0.12 (Decay Model)</td>
-              </tr>
-              <tr>
-                <td class="py-3 font-medium text-white flex items-center gap-2">
-                  <span class="w-2 h-2 rounded-full bg-purple-400"></span>
-                  <span>Walking Double-Support %</span>
-                </td>
-                <td class="py-3 font-mono text-[11px] text-slate-400">com.google.step_count.cadence_biomechanics</td>
-                <td class="py-3 font-mono font-bold text-purple-400 text-sm" id="insp-ds">29.2%</td>
-                <td class="py-3 font-mono text-slate-400">30.5%</td>
-                <td class="py-3 text-emerald-300 font-mono">-1.3% (Youthful)</td>
-                <td class="py-3 text-slate-400 font-mono">&beta; = 0.26 (Frailty Curve)</td>
-              </tr>
-            </tbody>
+            <tbody id="insp-body" class="divide-y divide-slate-800/60 text-slate-300"></tbody>
           </table>
         </div>
       </div>
@@ -919,846 +821,565 @@
   </main>
 
   <!-- Interactive Toast Notification -->
-  <div id="toast" class="fixed bottom-6 right-6 px-4 py-3 rounded-xl bg-emerald-950 border border-emerald-500/40 text-emerald-200 text-xs shadow-2xl flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none z-50">
+  <div id="toast" class="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:bottom-6 px-4 py-3 rounded-xl bg-emerald-950 border border-emerald-500/40 text-emerald-200 text-xs shadow-2xl flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none z-50">
     <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
     <span id="toast-msg">Settings updated successfully.</span>
   </div>
 
-  <!-- Application Logic & Engine -->
   <script>
-    // State Store
-    const state = {
-      chronoAge: 40.0,
-      vo2: 46.5,
-      hrr: 32,
-      doubleSupport: 28.0,
-      hrv: 54,
-      rhr: 56,
-      bioAge: 36.8,
-      pace: 0.84,
-      activeDecade: 40
-    };
+    const $ = (id) => document.getElementById(id);
+    const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const fmt = (v) => (v == null ? '—' : String(+Number(v).toFixed(1)));
 
-    // Profiles Configuration
+    // Metric catalogue. `ref` = age-40 population median used by the model.
+    const METRICS = {
+      rhr: { label: 'Resting heart rate', unit: 'bpm', ref: 66, min: 30, max: 130, lowerBetter: true, field: 'RestingHeartRate', term: 'linear ×0.16 per bpm', pat: /resting.*(heart|hr)|rhr/i },
+      vo2: { label: 'VO2 max (Cardio fitness)', unit: 'ml/kg/min', ref: 38, min: 10, max: 90, lowerBetter: false, field: 'VO2Max', term: 'power ^1.35 ×8.5', pat: /vo2/i },
+      hrr: { label: 'Heart rate recovery (1 min)', unit: 'bpm drop', ref: 24, min: 0, max: 80, lowerBetter: false, field: 'HeartRateRecoveryOneMinute', term: 'sigmoid k=0.12 ×6', pat: /recovery/i },
+      hrv: { label: 'Heart rate variability', unit: 'ms', ref: 42, min: 5, max: 300, lowerBetter: false, field: 'HeartRateVariability', term: 'log ×3.2', pat: /rmssd|hrv|variab/i },
+      ds:  { label: 'Walking double support', unit: '%', ref: 30.5, min: 10, max: 60, lowerBetter: true, field: 'WalkingDoubleSupportPercentage', term: 'linear ×0.35; exp. above 32%', pat: /double.?support/i }
+    };
+    const KEYS = Object.keys(METRICS);
+
     const profiles = {
-      'turning40-desk': {
-        name: 'Turning 40 (Desk Pro)',
-        chronoAge: 40.0,
-        vo2: 39.5,
-        hrr: 22,
-        doubleSupport: 31.5,
-        hrv: 38,
-        rhr: 68
-      },
-      'turning40-athlete': {
-        name: 'Turning 40 (Endurance Athlete)',
-        chronoAge: 40.0,
-        vo2: 52.0,
-        hrr: 38,
-        doubleSupport: 25.5,
-        hrv: 72,
-        rhr: 48
-      },
-      'thirties-prevention': {
-        name: 'Entering 30s (Prevention)',
-        chronoAge: 32.0,
-        vo2: 44.0,
-        hrr: 30,
-        doubleSupport: 27.5,
-        hrv: 58,
-        rhr: 58
-      },
-      'fifties-rebound': {
-        name: 'Age 52 (Longevity Rebound)',
-        chronoAge: 52.0,
-        vo2: 34.0,
-        hrr: 18,
-        doubleSupport: 34.0,
-        hrv: 28,
-        rhr: 72
-      }
+      'turning40-desk':      { chronoAge: 40, vo2: 39.5, hrr: 22, ds: 31.5, hrv: 38, rhr: 68 },
+      'turning40-athlete':   { chronoAge: 40, vo2: 52.0, hrr: 38, ds: 25.5, hrv: 72, rhr: 48 },
+      'thirties-prevention': { chronoAge: 32, vo2: 44.0, hrr: 30, ds: 27.5, hrv: 58, rhr: 58 },
+      'fifties-rebound':     { chronoAge: 52, vo2: 34.0, hrr: 18, ds: 34.0, hrv: 28, rhr: 72 }
     };
 
-    // Decade Roadmap Data
     const decadeData = {
-      20: {
-        title: "The 20s: Building the Biological Bank Account",
-        subtitle: "Maximizing peak bone mineral density, VO2 max ceiling, and vascular elasticity.",
-        metrics: [
-          { name: "Bone Mass", target: "Peak bone density window closes by age 28-30." },
-          { name: "Blood Pressure", target: "Establish baseline under 120/80 mmHg." },
-          { name: "Lipid Profile", target: "Baseline fasting panel every 4-5 years." }
-        ],
-        clinical: "Focus on preventative lifestyle habits, completing the HPV vaccine series (recommended through 26), and baseline STI/metabolic panels."
-      },
-      30: {
-        title: "The 30s: Detecting the Silent Metabolic Drift",
-        subtitle: "Metabolic rate begins gradual slowdown; resting insulin sensitivity diverges.",
-        metrics: [
-          { name: "Prediabetes Screening", target: "Mandatory at 35 for BMI ≥ 25 (USPSTF Grade B)." },
-          { name: "Muscle Mass (Sarcopenia)", target: "3% to 8% loss per decade without progressive overload." },
-          { name: "Liver Enzymes & ALT", target: "Monitor non-alcoholic fatty liver (NAFLD/MASLD)." }
-        ],
-        clinical: "Annual physical checkups with comprehensive metabolic panels. Track lipid subfractions and start resistance training 3x weekly."
-      },
-      40: {
-        title: "The 40s (Your Milestone): The Cardiovascular & Cancer Pivot",
-        subtitle: "Entering your 40th year shifts medicine from passive habits to formal 10-year risk scoring and cancer surveillance.",
-        metrics: [
-          { name: "10-Year ASCVD Risk Score", target: "Calculated at 40; dictates statin primary prevention." },
-          { name: "Presbyopia & Glaucoma", target: "Baseline ophthalmological exam for lens elasticity." },
-          { name: "Colorectal Runway", target: "Review family history; prepare for routine screening at 45." },
-          { name: "Breast Cancer Screening", target: "Biennial mammograms start at 40 (CDC/USPSTF)." }
-        ],
-        clinical: "Your 40th birthday triggers formal primary prevention: calculate ASCVD risk score, obtain baseline ApoB and HbA1c, and evaluate sleep/vagal dynamics."
-      },
-      50: {
-        title: "The 50s+: Organ Preservation & Cancer Surveillance",
-        subtitle: "Active cancer screening protocols and maintaining neuromuscular fall prevention.",
-        metrics: [
-          { name: "Colorectal Screening", target: "Mandatory colonoscopy or FIT/sDNA starting 45-50." },
-          { name: "Shingles Vaccination", target: "Recombinant zoster vaccine (2-dose) starting at 50." },
-          { name: "Bone Density & DEXA", target: "Osteopenia/osteoporosis surveillance." },
-          { name: "Lung Screening", target: "Low-dose CT for 20+ pack-year smoking history." }
-        ],
-        clinical: "Strict cardiovascular and oncologic screening cadence. Intensive balance and unilateral strength training to maintain gait stability."
-      }
+      20: { title: "The 20s: Building the Biological Bank Account", subtitle: "Maximizing peak bone mineral density, VO2 max ceiling, and vascular elasticity.",
+        metrics: [ { name: "Bone Mass", target: "Peak bone density window closes by age 28-30." }, { name: "Blood Pressure", target: "Establish baseline under 120/80 mmHg." }, { name: "Lipid Profile", target: "Baseline fasting panel every 4-5 years." } ],
+        clinical: "Focus on preventative lifestyle habits, completing the HPV vaccine series (recommended through 26), and baseline STI/metabolic panels." },
+      30: { title: "The 30s: Detecting the Silent Metabolic Drift", subtitle: "Metabolic rate begins gradual slowdown; resting insulin sensitivity diverges.",
+        metrics: [ { name: "Prediabetes Screening", target: "Begins at 35 for adults with overweight or obesity (USPSTF Grade B)." }, { name: "Muscle Mass (Sarcopenia)", target: "3% to 8% loss per decade without progressive overload." }, { name: "Liver Enzymes & ALT", target: "Monitor non-alcoholic fatty liver (NAFLD/MASLD)." } ],
+        clinical: "Annual physical checkups with comprehensive metabolic panels. Track lipid subfractions and start resistance training 3x weekly." },
+      40: { title: "The 40s (Milestone): The Cardiovascular & Cancer Pivot", subtitle: "Entering your 40th year shifts medicine from passive habits to formal 10-year risk scoring and cancer surveillance.",
+        metrics: [ { name: "10-Year ASCVD Risk Score", target: "Calculated from 40; informs statin primary prevention." }, { name: "Presbyopia & Glaucoma", target: "Baseline ophthalmological exam for lens elasticity." }, { name: "Colorectal Runway", target: "Review family history; prepare for routine screening at 45." }, { name: "Breast Cancer Screening", target: "Biennial mammograms start at 40 (USPSTF)." } ],
+        clinical: "Your 40th birthday is a good time to calculate an ASCVD risk score, discuss ApoB and HbA1c with your doctor, and review sleep and recovery trends." },
+      50: { title: "The 50s+: Organ Preservation & Cancer Surveillance", subtitle: "Active cancer screening protocols and maintaining neuromuscular fall prevention.",
+        metrics: [ { name: "Colorectal Screening", target: "Colonoscopy or FIT/sDNA from age 45." }, { name: "Shingles Vaccination", target: "Recombinant zoster vaccine (2-dose) starting at 50." }, { name: "Bone Density & DEXA", target: "Osteopenia/osteoporosis surveillance." }, { name: "Lung Screening", target: "Low-dose CT for 20+ pack-year smoking history." } ],
+        clinical: "Strict cardiovascular and oncologic screening cadence. Intensive balance and unilateral strength training to maintain gait stability." }
     };
 
-    // Upgraded Clinical Calculation Engine (Nonlinear Hazard & Vagal Sigmoid Model)
-    function calculateBiologicalMetrics() {
-      // Demographic reference benchmarks for age 40 (Demographic controls from NHANES / UK Biobank)
-      const refVo2 = 38.0;   // median VO2 max (ml/kg/min)
-      const refHrr = 24.0;   // median 60-second post-exercise heart rate drop (bpm)
-      const refDs = 30.5;    // median walking double-support time (%)
-      const refHrv = 42.0;   // median sleep rMSSD (ms)
-      const refRhr = 66.0;   // median resting heart rate (bpm)
-
-      // 1. Nonlinear Cardiorespiratory Power Curve (Mandsager et al. JAMA 2018)
-      const vo2Ratio = state.vo2 / refVo2;
-      const dVo2 = - (Math.pow(vo2Ratio, 1.35) - 1.0) * 8.5;
-
-      // 2. Autonomic Vagal Sigmoid Rebound (Heart Rate Recovery)
-      const vagalShift = (state.hrr - refHrr);
-      const dHrr = - (2.0 / (1.0 + Math.exp(-0.12 * vagalShift)) - 1.0) * 6.0;
-
-      // 3. Neuromuscular Frailty Hazard (UK Biobank MoveAge Gait Model)
-      let dDs = 0;
-      if (state.doubleSupport > 32.0) {
-        dDs = (Math.exp(0.28 * (state.doubleSupport - 32.0)) - 1.0) * 2.8;
-      } else {
-        dDs = (state.doubleSupport - refDs) * 0.35;
-      }
-
-      // 4. Autonomic Tone Logarithmic Decay (Nocturnal HRV)
-      const hrvRatio = Math.max(0.2, state.hrv / refHrv);
-      const dHrv = - Math.log(hrvRatio) * 3.2;
-
-      // 5. Basal Cardiac Strain & ASCVD Supra-Additive Coupling
-      const dRhr = (state.rhr - refRhr) * 0.16;
-      const couplingPenalty = (state.rhr > 70 && state.hrr < 20) ? 1.8 : 0.0;
-
-      const totalBiologicalDelta = dVo2 + dHrr + dDs + dHrv + dRhr + couplingPenalty;
-      state.bioAge = Math.max(22.0, Math.min(78.0, +(state.chronoAge + totalBiologicalDelta).toFixed(1)));
-      
-      // Biological Velocity (Pace of aging: years aged per calendar year)
-      const velocityIndex = (state.bioAge / state.chronoAge);
-      state.pace = +(Math.max(0.55, Math.min(1.65, velocityIndex * 0.94))).toFixed(2);
-
-      updateDOM();
-      updateChart();
-      updateInspectorTable();
-    }
-
-    // Update DOM Elements
-    function updateDOM() {
-      // KPI values
-      const bioAgeEl = document.getElementById('metric-bio-age');
-      if (bioAgeEl) bioAgeEl.textContent = state.bioAge.toFixed(1);
-
-      const paceEl = document.getElementById('metric-pace-val');
-      if (paceEl) paceEl.textContent = state.pace.toFixed(2);
-
-      const vo2El = document.getElementById('metric-vo2-val');
-      if (vo2El) vo2El.textContent = state.vo2.toFixed(1);
-
-      // Slider value labels
-      const sVo2 = document.getElementById('slider-vo2-val');
-      if (sVo2) sVo2.textContent = state.vo2.toFixed(1) + ' ml/kg';
-
-      const sHrr = document.getElementById('slider-hrr-val');
-      if (sHrr) sHrr.textContent = state.hrr + ' bpm';
-
-      const sDs = document.getElementById('slider-ds-val');
-      if (sDs) sDs.textContent = state.doubleSupport.toFixed(1) + '%';
-
-      const sHrv = document.getElementById('slider-hrv-val');
-      if (sHrv) sHrv.textContent = state.hrv + ' ms';
-
-      const sRhr = document.getElementById('slider-rhr-val');
-      if (sRhr) sRhr.textContent = state.rhr + ' bpm';
-
-      // Table values
-      const tVo2 = document.getElementById('table-vo2');
-      if (tVo2) tVo2.textContent = state.vo2.toFixed(1) + ' ml/kg/min';
-
-      const tHrr = document.getElementById('table-hrr');
-      if (tHrr) tHrr.textContent = state.hrr + ' bpm drop';
-
-      const tDs = document.getElementById('table-ds');
-      if (tDs) tDs.textContent = state.doubleSupport.toFixed(1) + '%';
-
-      const tHrv = document.getElementById('table-hrv');
-      if (tHrv) tHrv.textContent = state.hrv + ' ms';
-
-      // Doctor report values
-      const docBio = document.getElementById('doc-bio-age');
-      if (docBio) docBio.textContent = state.bioAge.toFixed(1) + ' Years';
-
-      const docRhr = document.getElementById('doc-rhr');
-      if (docRhr) docRhr.textContent = state.rhr + ' bpm';
-
-      const docHrr = document.getElementById('doc-hrr');
-      if (docHrr) docHrr.textContent = state.hrr + ' bpm drop';
-
-      const docVo2 = document.getElementById('doc-vo2');
-      if (docVo2) docVo2.textContent = state.vo2.toFixed(1) + ' ml/kg/min';
-
-      const docDs = document.getElementById('doc-ds');
-      if (docDs) docDs.textContent = state.doubleSupport.toFixed(1) + '%';
-    }
-
-    // Chart.js Instance
+    // ---------- State ----------
+    const LS_DATA = 'decadeshift.actual.v1', LS_MODE = 'decadeshift.mode.v1';
+    let mode = 'demo';
+    const demo = { chronoAge: 40, vals: {}, profile: 'turning40-desk' };
+    const actual = { chronoAge: 40, vals: { rhr: null, vo2: null, hrr: null, hrv: null, ds: null }, meta: {}, confirmed: {}, source: '', loadedAt: null };
+    let res = { n: 0 };
     let chartInstance = null;
 
+    const cur = () => (mode === 'demo' ? demo : actual);
+    function loadProfile(key) {
+      const p = profiles[key]; if (!p) return;
+      demo.profile = key; demo.chronoAge = p.chronoAge;
+      KEYS.forEach((k) => (demo.vals[k] = p[k]));
+    }
+    function persist() {
+      try { localStorage.setItem(LS_DATA, JSON.stringify(actual)); localStorage.setItem(LS_MODE, mode); } catch (e) {}
+    }
+    function restore() {
+      try {
+        const d = JSON.parse(localStorage.getItem(LS_DATA) || 'null');
+        if (d && d.vals) Object.assign(actual, d);
+        mode = localStorage.getItem(LS_MODE) === 'actual' ? 'actual' : 'demo';
+      } catch (e) {}
+    }
+
+    // ---------- Model ----------
+    function compute() {
+      const c = cur(), v = c.vals, d = {};
+      d.vo2 = v.vo2 == null ? null : -(Math.pow(v.vo2 / 38, 1.35) - 1) * 8.5;
+      d.hrr = v.hrr == null ? null : -(2 / (1 + Math.exp(-0.12 * (v.hrr - 24))) - 1) * 6;
+      d.ds  = v.ds == null ? null : (v.ds > 32 ? (Math.exp(0.28 * (v.ds - 32)) - 1) * 2.8 : (v.ds - 30.5) * 0.35);
+      d.hrv = v.hrv == null ? null : -Math.log(Math.max(0.2, v.hrv / 42)) * 3.2;
+      d.rhr = v.rhr == null ? null : (v.rhr - 66) * 0.16;
+      d.coupling = (v.rhr != null && v.hrr != null && v.rhr > 70 && v.hrr < 20) ? 1.8 : 0;
+      const n = KEYS.filter((k) => v[k] != null).length;
+      if (!n) return { n: 0, d };
+      const total = KEYS.reduce((s, k) => s + (d[k] || 0), 0) + d.coupling;
+      const bioAge = Math.max(22, Math.min(78, +(c.chronoAge + total).toFixed(1)));
+      const pace = +Math.max(0.55, Math.min(1.65, (bioAge / c.chronoAge) * 0.94)).toFixed(2);
+      return { n, d, bioAge, pace };
+    }
+
+    // ---------- Rendering ----------
+    const setText = (id, t) => { const e = $(id); if (e) e.textContent = t; };
+    const withUnit = (k, v) => (v == null ? '—' : fmt(v) + ' ' + METRICS[k].unit);
+    const tone = (x) => (x <= -1 ? ['Youthful', 'text-emerald-400'] : x >= 1 ? ['Aged', 'text-rose-400'] : ['On par', 'text-yellow-400']);
+    const pillCls = 'px-2 py-0.5 rounded-full text-[10px] font-semibold border ';
+    const PILL = { good: 'bg-emerald-950 text-emerald-400 border-emerald-800', warn: 'bg-yellow-950 text-yellow-300 border-yellow-800', bad: 'bg-rose-950 text-rose-300 border-rose-800', neutral: 'bg-slate-800 text-slate-300 border-slate-700' };
+
+    function renderModeUI() {
+      const on = 'bg-emerald-600 text-white shadow', off = 'text-slate-400 hover:text-white';
+      $('mode-demo-btn').className = 'flex-1 sm:flex-none px-3 py-2 sm:py-1.5 rounded-md transition ' + (mode === 'demo' ? on : off);
+      $('mode-actual-btn').className = 'flex-1 sm:flex-none px-3 py-2 sm:py-1.5 rounded-md transition ' + (mode === 'actual' ? on : off);
+      $('preset-selector').classList.toggle('hidden', mode !== 'demo');
+      $('preset-selector').value = demo.profile;
+      const loaded = KEYS.filter((k) => actual.vals[k] != null).length;
+      const b = $('mode-banner'), dot = $('mode-dot'), t = $('mode-banner-title');
+      if (mode === 'demo') {
+        b.className = 'border-b px-3 sm:px-4 py-2 text-xs sm:text-sm bg-amber-950/60 border-amber-500/30';
+        dot.className = 'mt-1 h-2.5 w-2.5 rounded-full bg-amber-400 shrink-0'; t.className = 'text-amber-300'; t.textContent = 'Demo mode:';
+        setText('mode-banner-text', 'every number is simulated, not yours. Switch to Actual to use your own data.');
+      } else if (!loaded) {
+        b.className = 'border-b px-3 sm:px-4 py-2 text-xs sm:text-sm bg-slate-900 border-slate-700';
+        dot.className = 'mt-1 h-2.5 w-2.5 rounded-full bg-slate-500 shrink-0'; t.className = 'text-slate-300'; t.textContent = 'Actual mode:';
+        setText('mode-banner-text', 'no data loaded yet. Tap "Load my data".');
+      } else {
+        b.className = 'border-b px-3 sm:px-4 py-2 text-xs sm:text-sm bg-emerald-950/50 border-emerald-500/30';
+        dot.className = 'mt-1 h-2.5 w-2.5 rounded-full bg-emerald-400 shrink-0'; t.className = 'text-emerald-300'; t.textContent = 'Actual mode:';
+        setText('mode-banner-text', `showing your ${loaded} loaded metric${loaded > 1 ? 's' : ''} from ${actual.source || 'your data'}.`);
+      }
+    }
+
+    function renderDataCheck() {
+      const v = cur().vals, isDemo = mode === 'demo';
+      const loaded = KEYS.filter((k) => v[k] != null).length;
+      const confirmed = KEYS.filter((k) => !isDemo && v[k] != null && actual.confirmed[k]).length;
+      const st = $('dc-status'); let cls, txt, detail;
+      if (isDemo) { cls = PILL.warn; txt = 'DEMO • SIMULATED'; detail = 'These values come from the selected demo profile or the sliders.'; }
+      else if (!loaded) { cls = PILL.neutral; txt = 'NO DATA LOADED'; detail = 'Nothing has been loaded yet, so no scores are shown.'; }
+      else if (confirmed === loaded) { cls = PILL.good; txt = `VERIFIED • ${loaded}/5`; detail = `All ${loaded} loaded values confirmed against your app. Loaded ${new Date(actual.loadedAt).toLocaleString()}.`; }
+      else { cls = PILL.good; txt = `DATA LOADED • ${loaded}/5`; detail = `${loaded} of 5 metrics loaded, ${confirmed} confirmed against your app. Loaded ${new Date(actual.loadedAt).toLocaleString()}.`; }
+      st.className = 'px-2 py-0.5 rounded text-[11px] font-mono font-bold border ' + cls; st.textContent = txt;
+      setText('dc-detail', detail);
+      $('dc-clear-btn').classList.toggle('hidden', isDemo || !loaded);
+      $('dc-load-btn').classList.toggle('hidden', isDemo && false);
+      $('dc-load-btn').textContent = isDemo ? 'Use my own data' : (loaded ? 'Reload / add data' : 'Load my data');
+      $('dc-rows').innerHTML = KEYS.map((k) => {
+        const m = METRICS[k], val = v[k], meta = actual.meta[k] || {};
+        let sub, btn = '';
+        if (isDemo) sub = 'simulated';
+        else if (val == null) sub = 'not loaded';
+        else {
+          sub = [meta.date ? esc(String(meta.date).slice(0, 16)) : '', meta.src ? esc(meta.src) : '', meta.n ? meta.n + ' records' : ''].filter(Boolean).join(' • ');
+          if (meta.note) sub += `<br><span class="text-yellow-500">${esc(meta.note)}</span>`;
+          const ok = !!actual.confirmed[k];
+          btn = `<button data-confirm="${k}" class="mt-1 w-full py-1.5 rounded-lg text-[11px] font-medium border transition ${ok ? 'bg-emerald-600/30 border-emerald-500/50 text-emerald-200' : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'}">${ok ? '✓ Matches my app' : 'Matches my app?'}</button>`;
+        }
+        return `<div class="rounded-xl bg-slate-900/80 border ${val == null && !isDemo ? 'border-dashed border-slate-700' : 'border-slate-800'} p-3 flex flex-col gap-1 min-w-0">
+          <div class="text-[11px] text-slate-400 leading-tight">${m.label}</div>
+          <div class="font-mono text-xl font-bold ${val == null ? 'text-slate-600' : isDemo ? 'text-amber-300' : 'text-white'}">${fmt(val)}<span class="text-[10px] font-sans font-normal text-slate-400 ml-1">${val == null ? '' : m.unit}</span></div>
+          <div class="text-[10px] text-slate-500 leading-snug break-words">${sub}</div>${btn}</div>`;
+      }).join('');
+      setText('dc-hint', isDemo
+        ? 'Demo values are invented so you can explore the app. Nothing here reflects a real person.'
+        : 'To verify: open Google Health (Fitbit or Apple Health), find each metric, and check that the number and date match the card above, then tap "Matches my app?". Cards you didn\'t load stay empty instead of being guessed.');
+    }
+
+    function renderKpis() {
+      const c = cur(), v = c.vals, has = res.n > 0;
+      setText('metric-bio-age', has ? res.bioAge.toFixed(1) : '—');
+      setText('kpi-bio-chrono', has ? `vs ${c.chronoAge.toFixed(1)} chronological` : '');
+      const delta = has ? res.bioAge - c.chronoAge : null;
+      const bp = $('kpi-bio-pill'); bp.textContent = has ? `${delta > 0 ? '+' : ''}${delta.toFixed(1)} yrs` : '—';
+      bp.className = pillCls + (!has ? PILL.neutral : delta <= -1 ? PILL.good : delta >= 1 ? PILL.bad : PILL.warn);
+      setText('kpi-bio-note', has ? (res.n < 5 ? `Estimate from ${res.n} of 5 metrics` : 'Based on all 5 metrics') : 'Needs data');
+      setText('metric-pace-val', has ? res.pace.toFixed(2) : '—');
+      const pp = $('kpi-pace-pill'); pp.textContent = !has ? '—' : res.pace < 0.95 ? 'Slower' : res.pace > 1.05 ? 'Faster' : 'Typical';
+      pp.className = pillCls + (!has ? PILL.neutral : res.pace < 0.95 ? PILL.good : res.pace > 1.05 ? PILL.bad : PILL.warn);
+      setText('kpi-pace-note', has ? `${Math.abs(Math.round((1 - res.pace) * 365))} days ${res.pace <= 1 ? 'slower' : 'faster'} per year` : 'Needs data');
+      const rel = (k, id, tierId, noteId) => {
+        const val = v[k], ref = METRICS[k].ref;
+        setText(id, val == null ? '—' : fmt(val));
+        const diff = val == null ? null : val - ref, tier = $(tierId);
+        tier.textContent = diff == null ? '—' : diff >= 4 ? 'Above median' : diff <= -4 ? 'Below median' : 'Near median';
+        tier.className = pillCls + (diff == null ? PILL.neutral : diff >= 4 ? PILL.good : diff <= -4 ? PILL.warn : PILL.neutral);
+        setText(noteId, diff == null ? 'Not loaded' : `${diff >= 0 ? '+' : ''}${diff.toFixed(1)} vs age-40 median (${ref})`);
+      };
+      rel('vo2', 'metric-vo2-val', 'vo2-tier', 'kpi-vo2-note');
+      rel('hrv', 'metric-mobility-val', 'kpi-hrv-tier', 'kpi-hrv-note');
+    }
+
+    function renderInputs() {
+      const c = cur(), v = c.vals, isDemo = mode === 'demo';
+      const map = { vo2: ['input-vo2', 'slider-vo2-val', 'table-vo2', 'doc-vo2'], hrr: ['input-hrr', 'slider-hrr-val', 'table-hrr', 'doc-hrr'], ds: ['input-ds', 'slider-ds-val', 'table-ds', 'doc-ds'], hrv: ['input-hrv', 'slider-hrv-val', 'table-hrv', null], rhr: ['input-rhr', 'slider-rhr-val', 'table-rhr', 'doc-rhr'] };
+      KEYS.forEach((k) => {
+        const [inp, lab, tab, doc] = map[k], e = $(inp);
+        if (e) { if (v[k] != null) e.value = v[k]; e.disabled = !isDemo; e.classList.toggle('opacity-40', !isDemo); }
+        setText(lab, withUnit(k, v[k]));
+        if (tab) setText(tab, withUnit(k, v[k]));
+        if (doc) setText(doc, withUnit(k, v[k]));
+      });
+      $('slider-lock-note').classList.toggle('hidden', isDemo);
+      $('reset-sim-btn').classList.toggle('hidden', !isDemo);
+    }
+
+    function renderPillars() {
+      const d = res.d || {}, has = res.n > 0;
+      const set = (id, val) => {
+        const e = $(id);
+        if (val == null || !has) { e.textContent = '—'; e.className = 'text-sm font-bold text-slate-500 mt-1'; return; }
+        const [word, col] = tone(val);
+        e.textContent = `${word} (${val > 0 ? '+' : ''}${val.toFixed(1)} yrs)`; e.className = `text-sm font-bold ${col} mt-1`;
+      };
+      set('cardio-status', d.vo2);
+      set('vagal-status', d.hrr == null && d.hrv == null ? null : (d.hrr || 0) + (d.hrv || 0));
+      set('gait-status', d.ds);
+      set('circadian-status', d.rhr == null ? null : d.rhr + (d.coupling || 0));
+    }
+
+    function renderInspector() {
+      const v = cur().vals, isDemo = mode === 'demo';
+      $('insp-badge').textContent = isDemo ? 'Simulated demo values' : (res.n ? 'Loaded from your data' : 'No data loaded');
+      $('insp-badge').className = 'px-2 py-0.5 rounded text-[10px] font-mono border ' + (isDemo ? PILL.warn : res.n ? PILL.good : PILL.neutral);
+      setText('telemetry-timestamp', isDemo ? 'n/a (demo)' : (actual.loadedAt ? new Date(actual.loadedAt).toLocaleString() : 'not loaded'));
+      $('insp-body').innerHTML = KEYS.map((k) => {
+        const m = METRICS[k], val = v[k];
+        let varCell = '<span class="text-slate-500">—</span>', col = 'text-slate-500';
+        if (val != null) {
+          const diff = val - m.ref, pct = (diff / m.ref) * 100, fav = m.lowerBetter ? diff <= 0 : diff >= 0;
+          col = fav ? 'text-emerald-400' : 'text-yellow-400';
+          varCell = `<span class="${fav ? 'text-emerald-300' : 'text-yellow-300'}">${diff >= 0 ? '+' : ''}${diff.toFixed(1)} (${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%)</span>`;
+        }
+        return `<tr><td class="py-3 pr-3 font-medium text-white">${m.label}</td>
+          <td class="py-3 pr-3 font-mono text-[11px] text-slate-400">${esc(m.field)}</td>
+          <td class="py-3 pr-3 font-mono font-bold ${col} text-sm">${withUnit(k, val)}</td>
+          <td class="py-3 pr-3 font-mono text-slate-400">${m.ref} ${m.unit}</td>
+          <td class="py-3 pr-3 font-mono">${varCell}</td>
+          <td class="py-3 font-mono text-[11px] text-slate-400">${m.term}</td></tr>`;
+      }).join('');
+    }
+
+    function renderDoc() {
+      const c = cur(), has = res.n > 0;
+      setText('doc-age', `${c.chronoAge.toFixed(0)} years`);
+      setText('doc-bio-age', has ? res.bioAge.toFixed(1) + ' years' : '—');
+      setText('doc-date', new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }));
+      setText('doc-source', mode === 'demo' ? 'Simulated demo data' : (actual.source || 'No data loaded'));
+      $('doc-demo-note').classList.toggle('hidden', mode !== 'demo');
+      const v = c.vals;
+      const note = (k) => (v[k] == null ? 'Not loaded' : `Age-40 median: ${METRICS[k].ref} ${METRICS[k].unit}`);
+      setText('doc-rhr-note', note('rhr')); setText('doc-hrr-note', note('hrr')); setText('doc-vo2-note', note('vo2'));
+      setText('doc-ds-note', v.ds == null ? 'Not loaded' : `Age-40 median double support: ${METRICS.ds.ref}%. Higher values suggest less stable gait.`);
+    }
+
     function initChart() {
-      const ctx = document.getElementById('trajectoryChart');
-      if (!ctx) return;
-
-      const labels = ['Age 25', 'Age 30', 'Age 35', 'Age 40 (Now)', 'Age 45', 'Age 50'];
-      const standardAges = [25, 30, 35, 40, 45, 50];
-      
-      // Calculate dynamic curve based on state.pace
-      const paceFactor = state.pace;
-      const currentBio = state.bioAge;
-      const userTrajectory = [
-        24.0,
-        28.5,
-        32.5,
-        currentBio,
-        +(currentBio + (5 * paceFactor)).toFixed(1),
-        +(currentBio + (10 * paceFactor)).toFixed(1)
-      ];
-
+      const ctx = $('trajectoryChart'); if (!ctx || typeof Chart === 'undefined') return;
       chartInstance = new Chart(ctx, {
         type: 'line',
-        data: {
-          labels: labels,
-          datasets: [
-            {
-              label: 'Your Biological Age',
-              data: userTrajectory,
-              borderColor: '#10b981',
-              backgroundColor: 'rgba(16, 185, 129, 0.1)',
-              borderWidth: 3,
-              fill: true,
-              tension: 0.35,
-              pointBackgroundColor: '#10b981',
-              pointRadius: [3, 3, 3, 6, 4, 4],
-              pointHoverRadius: 8
-            },
-            {
-              label: 'Standard Chronological Age',
-              data: standardAges,
-              borderColor: '#64748b',
-              borderWidth: 2,
-              borderDash: [5, 5],
-              fill: false,
-              tension: 0,
-              pointRadius: 0
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: false
-            },
-            tooltip: {
-              backgroundColor: '#0f172a',
-              titleColor: '#e2e8f0',
-              bodyColor: '#34d399',
-              borderColor: '#334155',
-              borderWidth: 1,
-              padding: 10
-            }
-          },
-          scales: {
-            y: {
-              grid: { color: 'rgba(255, 255, 255, 0.05)' },
-              ticks: { color: '#94a3b8', font: { family: 'Inter' } }
-            },
-            x: {
-              grid: { color: 'rgba(255, 255, 255, 0.05)' },
-              ticks: { color: '#94a3b8', font: { family: 'Inter' } }
-            }
-          }
-        }
+        data: { labels: [], datasets: [
+          { label: 'Your biological age', data: [], borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)', borderWidth: 3, fill: true, tension: 0.35, pointBackgroundColor: '#10b981', pointRadius: 4, pointHoverRadius: 8, spanGaps: false },
+          { label: 'Chronological age', data: [], borderColor: '#64748b', borderWidth: 2, borderDash: [5, 5], fill: false, tension: 0, pointRadius: 0 }
+        ] },
+        options: { responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false }, tooltip: { backgroundColor: '#0f172a', titleColor: '#e2e8f0', bodyColor: '#34d399', borderColor: '#334155', borderWidth: 1, padding: 10 } },
+          scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } }, x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', maxRotation: 0, autoSkip: true } } } }
       });
     }
 
     function updateChart() {
       if (!chartInstance) return;
-      const paceFactor = state.pace;
-      const currentBio = state.bioAge;
-      chartInstance.data.datasets[0].data = [
-        24.0,
-        28.5,
-        32.5,
-        currentBio,
-        +(currentBio + (5 * paceFactor)).toFixed(1),
-        +(currentBio + (10 * paceFactor)).toFixed(1)
-      ];
+      const c = cur(), a = Math.round(c.chronoAge), has = res.n > 0;
+      const offs = [-15, -10, -5, 0, 5, 10];
+      chartInstance.data.labels = offs.map((o) => (o === 0 ? `Age ${a} (now)` : `Age ${a + o}`));
+      chartInstance.data.datasets[1].data = offs.map((o) => a + o);
+      // Past points are only drawn in demo mode: we have no history for real users.
+      const past = mode === 'demo' ? [a - 15 - 1, a - 10 - 1.5, a - 5 - 2.5] : [null, null, null];
+      chartInstance.data.datasets[0].data = has ? [...past, res.bioAge, +(res.bioAge + 5 * res.pace).toFixed(1), +(res.bioAge + 10 * res.pace).toFixed(1)] : [];
       chartInstance.update();
     }
 
-    // Render Decade Content
+    function renderAll() {
+      res = compute();
+      renderModeUI(); renderDataCheck(); renderKpis(); renderInputs(); renderPillars(); renderInspector(); renderDoc(); updateChart();
+    }
+
     function renderDecadeContent(decade) {
-      const container = document.getElementById('decade-details-container');
-      if (!container) return;
+      const container = $('decade-details-container'); if (!container) return;
       const data = decadeData[decade] || decadeData[40];
-
-      let metricsHtml = data.metrics.map(m => `
-        <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800">
-          <div class="font-semibold text-white text-xs sm:text-sm text-emerald-400">${m.name}</div>
-          <div class="text-xs text-slate-300 mt-1">${m.target}</div>
-        </div>
-      `).join('');
-
-      container.innerHTML = `
-        <div class="border-b border-slate-800 pb-4">
-          <div class="flex items-center gap-2">
-            <h3 class="text-lg font-bold text-white">${data.title}</h3>
-            ${decade === 40 ? '<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-950 text-emerald-400 border border-emerald-800">Your Current Milestone</span>' : ''}
-          </div>
-          <p class="text-xs text-slate-400 mt-1">${data.subtitle}</p>
-        </div>
-        
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          ${metricsHtml}
-        </div>
-
-        <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300">
-          <strong class="text-white block mb-1">Clinical Directive:</strong>
-          ${data.clinical}
-        </div>
-      `;
+      const metricsHtml = data.metrics.map((m) => `<div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800"><div class="font-semibold text-xs sm:text-sm text-emerald-400">${m.name}</div><div class="text-xs text-slate-300 mt-1">${m.target}</div></div>`).join('');
+      container.innerHTML = `<div class="border-b border-slate-800 pb-4"><h3 class="text-lg font-bold text-white">${data.title}</h3><p class="text-xs text-slate-400 mt-1">${data.subtitle}</p></div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">${metricsHtml}</div>
+        <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300"><strong class="text-white block mb-1">Clinical directive:</strong>${data.clinical}</div>`;
     }
 
-    // Show Toast
+    let toastTimer;
     function showToast(msg) {
-      const toast = document.getElementById('toast');
-      const toastMsg = document.getElementById('toast-msg');
-      if (!toast || !toastMsg) return;
-      toastMsg.textContent = msg;
-      toast.classList.remove('translate-y-20', 'opacity-0');
-      toast.classList.add('translate-y-0', 'opacity-100');
-      setTimeout(() => {
-        toast.classList.remove('translate-y-0', 'opacity-100');
-        toast.classList.add('translate-y-20', 'opacity-0');
-      }, 3000);
+      const toast = $('toast'); if (!toast) return;
+      $('toast-msg').textContent = msg;
+      toast.classList.remove('translate-y-20', 'opacity-0'); toast.classList.add('translate-y-0', 'opacity-100');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { toast.classList.remove('translate-y-0', 'opacity-100'); toast.classList.add('translate-y-20', 'opacity-0'); }, 3500);
     }
 
-    // Event Listeners
+    // ---------- Mode + data actions ----------
+    function setMode(m) { mode = m; persist(); renderAll(); }
+    function openModal() { $('import-modal').classList.remove('hidden'); }
+    function closeModal() { $('import-modal').classList.add('hidden'); }
+
+    function applyResults(found, srcLabel, age) {
+      const keys = Object.keys(found);
+      if (!keys.length) return 0;
+      keys.forEach((k) => {
+        actual.vals[k] = found[k].value;
+        actual.meta[k] = { date: found[k].date || '', src: found[k].src || srcLabel, n: found[k].n || 0, note: found[k].note || '' };
+        actual.confirmed[k] = false;
+      });
+      if (age) actual.chronoAge = age;
+      actual.source = srcLabel; actual.loadedAt = Date.now();
+      mode = 'actual'; persist(); renderAll();
+      return keys.length;
+    }
+
+    function applyManual() {
+      const err = $('manual-error'); err.classList.add('hidden');
+      const found = {}, src = $('m-source').value, date = $('m-date').value;
+      const ids = { rhr: 'm-rhr', vo2: 'm-vo2', hrr: 'm-hrr', hrv: 'm-hrv', ds: 'm-ds' };
+      for (const k of KEYS) {
+        const raw = $(ids[k]).value.trim(); if (raw === '') continue;
+        const n = parseFloat(raw), m = METRICS[k];
+        if (!isFinite(n) || n < m.min || n > m.max) { err.textContent = `${m.label}: enter a value between ${m.min} and ${m.max} ${m.unit}.`; err.classList.remove('hidden'); return; }
+        found[k] = { value: n, date, src: src + ' (typed)', n: 0 };
+      }
+      const ageRaw = $('m-age').value.trim(), age = ageRaw === '' ? null : parseFloat(ageRaw);
+      if (age !== null && (!isFinite(age) || age < 18 || age > 100)) { err.textContent = 'Age must be between 18 and 100.'; err.classList.remove('hidden'); return; }
+      if (!Object.keys(found).length) { err.textContent = 'Enter at least one metric.'; err.classList.remove('hidden'); return; }
+      const n = applyResults(found, src, age);
+      closeModal(); showToast(`Loaded ${n} metric${n > 1 ? 's' : ''}. Compare them with your app below.`);
+      $('data-check').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // ---------- File parsing ----------
+    const APPLE_TYPES = { RestingHeartRate: 'rhr', VO2Max: 'vo2', HeartRateRecoveryOneMinute: 'hrr', HeartRateVariabilitySDNN: 'hrv', AppleWalkingDoubleSupportPercentage: 'ds' };
+
+    function toNum(x) {
+      if (typeof x === 'number') return isFinite(x) ? x : null;
+      if (typeof x !== 'string') return null;
+      const r = x.trim().match(/^(\d+(?:\.\d+)?)\s*[-–]\s*(\d+(?:\.\d+)?)$/);
+      if (r) return (parseFloat(r[1]) + parseFloat(r[2])) / 2;
+      const m = x.match(/-?\d+(?:\.\d+)?/);
+      return m ? parseFloat(m[0]) : null;
+    }
+    function collector() {
+      const best = {};
+      return { best, add(k, raw, date, order) {
+        const m = METRICS[k]; let val = raw;
+        if (k === 'ds' && val > 0 && val <= 1) val *= 100;
+        if (val == null || val < m.min || val > m.max) return;
+        const ts = Date.parse(date); const key = isNaN(ts) ? order : ts;
+        const b = best[k] || (best[k] = { n: 0, key: -Infinity });
+        b.n++;
+        if (key >= b.key) { b.key = key; b.value = val; b.date = date || ''; }
+      } };
+    }
+
+    async function parseApple(file, col, onProgress) {
+      const re = /<Record\s[^>]*>/g;
+      const handle = (s) => {
+        for (const mt of s.matchAll(re)) {
+          const tag = mt[0], t = /type="HK(?:Quantity|Category)TypeIdentifier([^"]+)"/.exec(tag);
+          const k = t && APPLE_TYPES[t[1]]; if (!k) continue;
+          const val = parseFloat((/value="([^"]*)"/.exec(tag) || [])[1]);
+          const dt = (/startDate="([^"]*)"/.exec(tag) || [])[1] || '';
+          if (!isNaN(val)) col.add(k, val, dt.replace(' ', 'T').replace(/ ([+-]\d\d)(\d\d)$/, '$1:$2'), 0);
+        }
+      };
+      if (!file.stream) { handle(await file.text()); return; }
+      const reader = file.stream().getReader(), dec = new TextDecoder(); let buf = '', read = 0;
+      for (;;) {
+        const { done, value } = await reader.read(); if (done) break;
+        read += value.length; buf += dec.decode(value, { stream: true });
+        const i = buf.lastIndexOf('>'); if (i >= 0) { handle(buf.slice(0, i + 1)); buf = buf.slice(i + 1); }
+        onProgress(read / file.size);
+      }
+      handle(buf);
+    }
+
+    function parseCsvLine(l) {
+      const out = []; let c = '', q = false;
+      for (const ch of l) { if (ch === '"') q = !q; else if (ch === ',' && !q) { out.push(c); c = ''; } else c += ch; }
+      out.push(c); return out;
+    }
+    function parseCsv(text, col) {
+      const lines = text.split(/\r?\n/).filter((l) => l.trim());
+      if (lines.length < 2) return;
+      const head = parseCsvLine(lines[0]).map((h) => h.trim());
+      const dateIdx = head.findIndex((h) => /date|time|day/i.test(h));
+      const colKey = head.map((h) => KEYS.find((k) => METRICS[k].pat.test(h)) || null);
+      for (let i = 1; i < lines.length; i++) {
+        const cells = parseCsvLine(lines[i]), date = dateIdx >= 0 ? cells[dateIdx] : '';
+        colKey.forEach((k, j) => { if (k) { const n = toNum(cells[j]); if (n != null) col.add(k, n, date, i); } });
+      }
+    }
+    function parseJson(text, fileName, col) {
+      const fileMetric = KEYS.find((k) => METRICS[k].pat.test(fileName)) || null;
+      let order = 0;
+      const walk = (o, date) => {
+        if (Array.isArray(o)) { o.forEach((x) => walk(x, date)); return; }
+        if (!o || typeof o !== 'object') return;
+        for (const [k, v] of Object.entries(o)) if (/date|time/i.test(k) && typeof v === 'string') { date = v; break; }
+        for (const [k, v] of Object.entries(o)) {
+          const mk = KEYS.find((x) => METRICS[x].pat.test(k)) || (k === 'value' ? fileMetric : null);
+          if (mk) {
+            const raw = v && typeof v === 'object' && !Array.isArray(v) ? (v.value ?? v.rmssd ?? v.filteredDemographicVo2Max ?? v.demographicVo2Max ?? v.vo2Max) : v;
+            const n = toNum(raw);
+            if (n != null) { col.add(mk, n, date, order++); continue; }
+          }
+          if (v && typeof v === 'object') walk(v, date);
+        }
+      };
+      walk(JSON.parse(text), '');
+    }
+
+    async function importFiles(files) {
+      const box = $('sync-progress-box'), bar = $('sync-progress-bar'), logEl = $('sync-console-log');
+      box.classList.remove('hidden'); logEl.classList.remove('hidden'); logEl.innerHTML = '';
+      const log = (msg, bad) => { const r = document.createElement('div'); r.textContent = '> ' + msg; if (bad) r.className = 'text-rose-400'; logEl.appendChild(r); logEl.scrollTop = logEl.scrollHeight; };
+      const prog = (p, label) => { const pc = Math.round(p * 100); bar.style.width = pc + '%'; setText('sync-progress-percent', pc + '%'); if (label) setText('sync-progress-label', label); };
+      const col = collector(); let sawApple = false;
+      for (let i = 0; i < files.length; i++) {
+        const f = files[i], base = i / files.length, span = 1 / files.length;
+        prog(base, `Reading ${f.name}`); log(`Reading ${f.name} (${(f.size / 1048576).toFixed(1)} MB)`);
+        try {
+          const lower = f.name.toLowerCase();
+          if (lower.endsWith('.xml')) { sawApple = true; await parseApple(f, col, (p) => prog(base + p * span)); }
+          else {
+            const text = await f.text();
+            if (lower.endsWith('.csv')) parseCsv(text, col); else if (lower.endsWith('.json')) parseJson(text, f.name, col); else throw new Error('unsupported file type');
+          }
+        } catch (e) { log(`${f.name}: could not be parsed (${e.message})`, true); }
+      }
+      prog(1, 'Done');
+      const found = {};
+      KEYS.forEach((k) => {
+        const b = col.best[k]; if (!b) return;
+        found[k] = { value: b.value, date: b.date, n: b.n, src: 'file' };
+        if (k === 'hrv' && sawApple) found[k].note = 'Apple reports SDNN, not rMSSD';
+        log(`${METRICS[k].label}: ${fmt(b.value)} ${METRICS[k].unit} (${String(b.date).slice(0, 10) || 'no date'}, ${b.n} records)`);
+      });
+      const names = files.map((f) => f.name).join(', ');
+      const n = applyResults(found, sawApple ? 'Apple Health export' : 'Imported file', null);
+      if (!n) { log('No recognizable metrics found. Nothing was changed.', true); return; }
+      log(`Loaded ${n} of 5 metrics. Missing ones stay empty.`);
+      setTimeout(() => { closeModal(); showToast(`Loaded ${n} metric${n > 1 ? 's' : ''} from ${files.length} file${files.length > 1 ? 's' : ''}. Compare them with your app.`); $('data-check').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 1500);
+    }
+
+    // ---------- Wiring ----------
     window.addEventListener('DOMContentLoaded', () => {
-      // Tab Navigation
-      document.querySelectorAll('.nav-tab').forEach(btn => {
-        btn.addEventListener('click', () => {
-          document.querySelectorAll('.nav-tab').forEach(b => {
-            b.classList.remove('tab-active');
-            b.classList.add('text-slate-400');
-          });
-          btn.classList.add('tab-active');
-          btn.classList.remove('text-slate-400');
+      restore(); loadProfile(demo.profile);
+      $('m-date').value = new Date().toISOString().slice(0, 10);
 
-          const target = btn.getAttribute('data-target');
-          document.querySelectorAll('.view-content').forEach(v => v.classList.add('hidden'));
-          const targetEl = document.getElementById(target);
-          if (targetEl) targetEl.classList.remove('hidden');
+      document.querySelectorAll('.nav-tab').forEach((btn) => btn.addEventListener('click', () => {
+        document.querySelectorAll('.nav-tab').forEach((b) => { b.classList.remove('tab-active'); b.classList.add('text-slate-400'); });
+        btn.classList.add('tab-active'); btn.classList.remove('text-slate-400');
+        document.querySelectorAll('.view-content').forEach((x) => x.classList.add('hidden'));
+        const t = $(btn.getAttribute('data-target')); if (t) t.classList.remove('hidden');
+        if (chartInstance) chartInstance.resize();
+        btn.scrollIntoView({ block: 'nearest', inline: 'center' });
+      }));
+      const goDoc = () => { const tab = document.querySelector('[data-target="clinical-view"]'); if (tab) tab.click(); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+      $('quick-doctor-btn').addEventListener('click', goDoc);
+      $('export-pdf-header-btn').addEventListener('click', goDoc);
+      $('print-report-btn').addEventListener('click', () => window.print());
 
-          if (target === 'telemetry-view' && chartInstance) {
-            chartInstance.resize();
-          }
-        });
+      document.querySelectorAll('.decade-btn').forEach((btn) => btn.addEventListener('click', () => {
+        document.querySelectorAll('.decade-btn').forEach((b) => { b.classList.remove('bg-emerald-600', 'text-white', 'shadow'); b.classList.add('text-slate-400'); });
+        btn.classList.add('bg-emerald-600', 'text-white', 'shadow'); btn.classList.remove('text-slate-400');
+        renderDecadeContent(parseInt(btn.getAttribute('data-decade'), 10));
+      }));
+
+      $('mode-demo-btn').addEventListener('click', () => setMode('demo'));
+      $('mode-actual-btn').addEventListener('click', () => setMode('actual'));
+      $('preset-selector').addEventListener('change', (e) => { loadProfile(e.target.value); renderAll(); showToast('Demo profile loaded (simulated).'); });
+      $('reset-sim-btn').addEventListener('click', () => { loadProfile(demo.profile); renderAll(); showToast('Demo values reset.'); });
+
+      const sliders = { vo2: ['input-vo2', parseFloat], hrr: ['input-hrr', parseFloat], ds: ['input-ds', parseFloat], hrv: ['input-hrv', parseFloat], rhr: ['input-rhr', parseFloat] };
+      Object.entries(sliders).forEach(([k, [id, parse]]) => $(id).addEventListener('input', (e) => { if (mode !== 'demo') return; demo.vals[k] = parse(e.target.value); renderAll(); }));
+
+      $('open-import-modal-btn').addEventListener('click', openModal);
+      $('dc-load-btn').addEventListener('click', openModal);
+      $('close-import-modal-btn').addEventListener('click', closeModal);
+      $('import-modal').addEventListener('click', (e) => { if (e.target === $('import-modal')) closeModal(); });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+      $('apply-manual-btn').addEventListener('click', applyManual);
+      $('drop-zone').addEventListener('click', () => $('health-file-input').click());
+      $('health-file-input').addEventListener('change', (e) => { const fl = Array.from(e.target.files); e.target.value = ''; if (fl.length) importFiles(fl); });
+
+      $('dc-rows').addEventListener('click', (e) => {
+        const b = e.target.closest('[data-confirm]'); if (!b) return;
+        const k = b.getAttribute('data-confirm'); actual.confirmed[k] = !actual.confirmed[k]; persist(); renderDataCheck();
+      });
+      $('dc-clear-btn').addEventListener('click', () => {
+        if (!confirm('Remove your loaded health numbers from this browser?')) return;
+        KEYS.forEach((k) => (actual.vals[k] = null)); actual.meta = {}; actual.confirmed = {}; actual.source = ''; actual.loadedAt = null;
+        persist(); renderAll(); showToast('Your data was cleared from this browser.');
       });
 
-      // Quick Doctor Report Button
-      const quickDocBtn = document.getElementById('quick-doctor-btn');
-      if (quickDocBtn) {
-        quickDocBtn.addEventListener('click', () => {
-          const tab = document.querySelector('[data-target="clinical-view"]');
-          if (tab) tab.click();
-        });
-      }
-
-      const exportHeaderBtn = document.getElementById('export-pdf-header-btn');
-      if (exportHeaderBtn) {
-        exportHeaderBtn.addEventListener('click', () => {
-          const tab = document.querySelector('[data-target="clinical-view"]');
-          if (tab) tab.click();
-          showToast('Opened 1-Page Doctor Summary. Ready to print or save.');
-        });
-      }
-
-      const printBtn = document.getElementById('print-report-btn');
-      if (printBtn) {
-        printBtn.addEventListener('click', () => {
-          window.print();
-        });
-      }
-
-      // Decade Selector Buttons
-      document.querySelectorAll('.decade-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          document.querySelectorAll('.decade-btn').forEach(b => {
-            b.classList.remove('bg-emerald-600', 'text-white', 'shadow');
-            b.classList.add('text-slate-400');
-          });
-          btn.classList.add('bg-emerald-600', 'text-white', 'shadow');
-          btn.classList.remove('text-slate-400');
-
-          const dec = parseInt(btn.getAttribute('data-decade'), 10);
-          state.activeDecade = dec;
-          renderDecadeContent(dec);
-        });
-      });
-
-      // Slider Listeners
-      const inVo2 = document.getElementById('input-vo2');
-      if (inVo2) {
-        inVo2.addEventListener('input', (e) => {
-          state.vo2 = parseFloat(e.target.value);
-          calculateBiologicalMetrics();
-        });
-      }
-
-      const inHrr = document.getElementById('input-hrr');
-      if (inHrr) {
-        inHrr.addEventListener('input', (e) => {
-          state.hrr = parseInt(e.target.value, 10);
-          calculateBiologicalMetrics();
-        });
-      }
-
-      const inDs = document.getElementById('input-ds');
-      if (inDs) {
-        inDs.addEventListener('input', (e) => {
-          state.doubleSupport = parseFloat(e.target.value);
-          calculateBiologicalMetrics();
-        });
-      }
-
-      const inHrv = document.getElementById('input-hrv');
-      if (inHrv) {
-        inHrv.addEventListener('input', (e) => {
-          state.hrv = parseInt(e.target.value, 10);
-          calculateBiologicalMetrics();
-        });
-      }
-
-      const inRhr = document.getElementById('input-rhr');
-      if (inRhr) {
-        inRhr.addEventListener('input', (e) => {
-          state.rhr = parseInt(e.target.value, 10);
-          calculateBiologicalMetrics();
-        });
-      }
-
-      // Reset Simulation Button
-      const resetBtn = document.getElementById('reset-sim-btn');
-      if (resetBtn) {
-        resetBtn.addEventListener('click', () => {
-          state.vo2 = 46.5;
-          state.hrr = 32;
-          state.doubleSupport = 28.0;
-          state.hrv = 54;
-          state.rhr = 56;
-          if (inVo2) inVo2.value = 46.5;
-          if (inHrr) inHrr.value = 32;
-          if (inDs) inDs.value = 28.0;
-          if (inHrv) inHrv.value = 54;
-          if (inRhr) inRhr.value = 56;
-          calculateBiologicalMetrics();
-          showToast('Simulation reset to baseline.');
-        });
-      }
-
-      // Preset Selector Listener
-      const presetSel = document.getElementById('preset-selector');
-      if (presetSel) {
-        presetSel.addEventListener('change', (e) => {
-          const p = profiles[e.target.value];
-          if (p) {
-            state.chronoAge = p.chronoAge;
-            state.vo2 = p.vo2;
-            state.hrr = p.hrr;
-            state.doubleSupport = p.doubleSupport;
-            state.hrv = p.hrv;
-            state.rhr = p.rhr;
-
-            if (inVo2) inVo2.value = p.vo2;
-            if (inHrr) inHrr.value = p.hrr;
-            if (inDs) inDs.value = p.doubleSupport;
-            if (inHrv) inHrv.value = p.hrv;
-            if (inRhr) inRhr.value = p.rhr;
-
-            calculateBiologicalMetrics();
-            showToast(`Loaded ${p.name}`);
-          }
-        });
-      }
-
-      
-    // Import Modal Listeners
-    const importModal = document.getElementById('import-modal');
-    const openImportBtn = document.getElementById('open-import-modal-btn');
-    const closeImportBtn = document.getElementById('close-import-modal-btn');
-    const applyQuickSyncBtn = document.getElementById('apply-quick-sync-btn');
-    const dropZone = document.getElementById('drop-zone');
-    const fileInput = document.getElementById('health-file-input');
-    const fileStatus = document.getElementById('file-import-status');
-
-    if (openImportBtn && importModal) {
-      openImportBtn.addEventListener('click', () => {
-        importModal.classList.remove('hidden');
-      });
-    }
-
-    if (closeImportBtn && importModal) {
-      closeImportBtn.addEventListener('click', () => {
-        importModal.classList.add('hidden');
-      });
-    }
-
-    // Quick Sync Form
-    if (applyQuickSyncBtn) {
-      applyQuickSyncBtn.addEventListener('click', () => {
-        const qVo2 = parseFloat(document.getElementById('quick-input-vo2').value);
-        const qRhr = parseInt(document.getElementById('quick-input-rhr').value, 10);
-        const qHrr = parseInt(document.getElementById('quick-input-hrr').value, 10);
-        const qDs = parseFloat(document.getElementById('quick-input-ds').value);
-
-        if (!isNaN(qVo2)) {
-          state.vo2 = qVo2;
-          const s = document.getElementById('input-vo2');
-          if (s) s.value = qVo2;
-        }
-        if (!isNaN(qRhr)) {
-          state.rhr = qRhr;
-          const s = document.getElementById('input-rhr');
-          if (s) s.value = qRhr;
-        }
-        if (!isNaN(qHrr)) {
-          state.hrr = qHrr;
-          const s = document.getElementById('input-hrr');
-          if (s) s.value = qHrr;
-        }
-        if (!isNaN(qDs)) {
-          state.doubleSupport = qDs;
-          const s = document.getElementById('input-ds');
-          if (s) s.value = qDs;
-        }
-
-        calculateBiologicalMetrics();
-        if (importModal) importModal.classList.add('hidden');
-        showToast('Real wearable metrics synced to dashboard!');
-      });
-    }
-
-    // Dropzone logic
-    if (dropZone && fileInput) {
-      dropZone.addEventListener('click', () => fileInput.click());
-      
-      fileInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-          if (fileStatus) {
-            fileStatus.classList.remove('hidden');
-            fileStatus.textContent = `Reading ${file.name} locally...`;
-          }
-          const reader = new FileReader();
-          reader.onload = function(evt) {
-            const text = evt.target.result;
-            // Parse sample records from Apple Health export.xml if found
-            let foundVo2 = null, foundRhr = null;
-            const vo2Match = text.match(/HKQuantityTypeIdentifierVO2Max["'][^>]*value=["']([0-9.]+)/);
-            if (vo2Match) foundVo2 = parseFloat(vo2Match[1]);
-            
-            const rhrMatch = text.match(/HKQuantityTypeIdentifierRestingHeartRate["'][^>]*value=["']([0-9.]+)/);
-            if (rhrMatch) foundRhr = parseInt(rhrMatch[1], 10);
-
-            if (foundVo2) {
-              state.vo2 = foundVo2;
-              const s = document.getElementById('input-vo2');
-              if (s) s.value = foundVo2;
-            }
-            if (foundRhr) {
-              state.rhr = foundRhr;
-              const s = document.getElementById('input-rhr');
-              if (s) s.value = foundRhr;
-            }
-
-            calculateBiologicalMetrics();
-            if (fileStatus) {
-              fileStatus.textContent = `Successfully parsed ${file.name}! Real metrics loaded.`;
-              fileStatus.className = 'text-xs text-emerald-400 font-medium';
-            }
-            setTimeout(() => {
-              if (importModal) importModal.classList.add('hidden');
-              showToast('Parsed local health file successfully!');
-            }, 1200);
-          };
-          reader.readAsText(file.slice(0, 1024 * 1024 * 5)); // Read up to first 5MB for instant browser parsing
-        }
-      });
-    }
-
-    
-    
-    // Real Animated Pipeline Console & Progress Engine
-    function runSyncPipeline(providerName, sampleData) {
-      const pBox = document.getElementById('sync-progress-box');
-      const pBar = document.getElementById('sync-progress-bar');
-      const pLabel = document.getElementById('sync-progress-label');
-      const pPercent = document.getElementById('sync-progress-percent');
-      const pConsole = document.getElementById('sync-console-log');
-      const activeBadge = document.getElementById('active-source-badge');
-      const samplesCount = document.getElementById('stream-samples-count');
-
-      if (!pBox || !pBar) return;
-      pBox.classList.remove('hidden');
-      pConsole.innerHTML = '';
-
-      function addLog(msg) {
-        const row = document.createElement('div');
-        row.textContent = `> ${msg}`;
-        pConsole.appendChild(row);
-        pConsole.scrollTop = pConsole.scrollHeight;
-      }
-
-      const steps = [
-        { pct: 15, label: `Authenticating with ${providerName} OAuth 2.0...`, log: `Sending client credentials to ${providerName} auth server...` },
-        { pct: 35, label: 'Accessing Health Data Scopes...', log: 'Scopes approved: fitness.heart_rate, fitness.activity, fitness.sleep' },
-        { pct: 60, label: 'Ingesting Time-Series Wearable Telemetry...', log: `Retrieved 1,420 continuous biometric points from ${providerName} cloud database.` },
-        { pct: 85, label: 'Executing Nonlinear Biological Velocity Hazard Matrix...', log: 'Calibrated against UK Biobank & JAMA Cardiorespiratory hazard models.' },
-        { pct: 100, label: 'Sync Complete! Data Verified.', log: `Applied real ${providerName} metrics: RHR ${sampleData.rhr} bpm, VO2 ${sampleData.vo2} ml/kg.` }
-      ];
-
-      let currentStep = 0;
-      function nextStep() {
-        if (currentStep < steps.length) {
-          const s = steps[currentStep];
-          pBar.style.width = s.pct + '%';
-          pPercent.textContent = s.pct + '%';
-          pLabel.textContent = s.label;
-          addLog(s.log);
-          currentStep++;
-          setTimeout(nextStep, 350);
-        } else {
-          state.rhr = sampleData.rhr;
-          state.vo2 = sampleData.vo2;
-          state.hrr = sampleData.hrr;
-          state.doubleSupport = sampleData.doubleSupport;
-          state.hrv = sampleData.hrv;
-
-          const inVo2 = document.getElementById('input-vo2');
-          const inRhr = document.getElementById('input-rhr');
-          const inHrr = document.getElementById('input-hrr');
-          const inDs = document.getElementById('input-ds');
-          const inHrv = document.getElementById('input-hrv');
-          if (inVo2) inVo2.value = sampleData.vo2;
-          if (inRhr) inRhr.value = sampleData.rhr;
-          if (inHrr) inHrr.value = sampleData.hrr;
-          if (inDs) inDs.value = sampleData.doubleSupport;
-          if (inHrv) inHrv.value = sampleData.hrv;
-
-          if (activeBadge) activeBadge.textContent = `${providerName} Live Ingestion`;
-          if (samplesCount) samplesCount.textContent = '1,420 Real Samples Active';
-
-          calculateBiologicalMetrics();
-
-          setTimeout(() => {
-            const importModal = document.getElementById('import-modal');
-            if (importModal) importModal.classList.add('hidden');
-            showToast(`${providerName} real metrics verified and loaded!`);
-            const inspectorTab = document.querySelector('[data-target="inspector-view"]');
-            if (inspectorTab) inspectorTab.click();
-          }, 800);
-        }
-      }
-      nextStep();
-    }
-
-    const googleLoginBtn = document.getElementById('google-login-btn');
-    if (googleLoginBtn) {
-      googleLoginBtn.addEventListener('click', () => {
-        runSyncPipeline('Google Health / WearOS', {
-          rhr: 61,
-          vo2: 43.8,
-          hrr: 28,
-          doubleSupport: 29.2,
-          hrv: 49
-        });
-      });
-    }
-
-    const fitbitLoginBtn = document.getElementById('fitbit-login-btn');
-    if (fitbitLoginBtn) {
-      fitbitLoginBtn.addEventListener('click', () => {
-        runSyncPipeline('Fitbit Cloud API', {
-          rhr: 58,
-          vo2: 45.2,
-          hrr: 30,
-          doubleSupport: 28.5,
-          hrv: 52
-        });
-      });
-    }
-
-    const viewRawBtn = document.getElementById('view-raw-telemetry-btn');
-    if (viewRawBtn) {
-      viewRawBtn.addEventListener('click', () => {
-        const inspectorTab = document.querySelector('[data-target="inspector-view"]');
-        if (inspectorTab) inspectorTab.click();
-      });
-    }
-
-
-    // Initialize
       renderDecadeContent(40);
-      calculateBiologicalMetrics();
       initChart();
+      renderAll();
     });
   </script>
 
-  <!-- Multi-Platform Health Import & OAuth Modal -->
-  <div id="import-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm hidden">
-    <div class="glass-card bg-slate-950 border-slate-700 rounded-2xl max-w-xl w-full p-6 space-y-5 shadow-2xl overflow-y-auto max-h-[90vh]">
+  <!-- Load-my-data modal -->
+  <div id="import-modal" role="dialog" aria-modal="true" aria-labelledby="import-title" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/80 backdrop-blur-sm hidden">
+    <div class="glass-card bg-slate-950 border-slate-700 sm:rounded-2xl rounded-t-2xl max-w-xl w-full p-4 sm:p-6 space-y-4 shadow-2xl overflow-y-auto max-h-[92vh]">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-lg bg-emerald-950 border border-emerald-800 flex items-center justify-center text-emerald-400">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-          </div>
-          <div>
-            <h3 class="text-base font-bold text-white">Import Health Data (Apple & Google)</h3>
-            <p class="text-xs text-slate-400">Direct Google Login, Health Connect, or Local Files</p>
-          </div>
+        <div>
+          <h3 id="import-title" class="text-base font-bold text-white">Load my data</h3>
+          <p class="text-xs text-slate-400">Numbers stay in this browser. Nothing is uploaded.</p>
         </div>
-        <button id="close-import-modal-btn" class="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">
+        <button id="close-import-modal-btn" aria-label="Close" class="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
       </div>
 
-      
-      <!-- Live Progress Bar & Stream Console (Visual Proof of Data Loading) -->
-      <div id="sync-progress-box" class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-3 hidden">
-        <div class="flex items-center justify-between text-xs">
-          <span id="sync-progress-label" class="font-semibold text-white">Connecting to Google Health Connect API...</span>
-          <span id="sync-progress-percent" class="font-mono text-emerald-400 font-bold">0%</span>
-        </div>
-        <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
-          <div id="sync-progress-bar" class="bg-gradient-to-r from-blue-500 via-emerald-400 to-cyan-400 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
-        </div>
-        <!-- Live Console Logs -->
-        <div id="sync-console-log" class="bg-slate-950 rounded-lg p-2.5 font-mono text-[10px] text-slate-400 space-y-1 max-h-28 overflow-y-auto border border-slate-800">
-          <div>&gt; Initiating OAuth handshake with Google Health...</div>
-        </div>
-      </div>
-
-      <!-- METHOD 1: Direct Google / Fitbit Cloud Login (Zero File Upload) -->
-      <div class="p-4 rounded-xl bg-gradient-to-r from-blue-950/60 to-slate-900 border border-blue-500/30 space-y-3">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <svg class="w-4 h-4 text-blue-400" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
-              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
-            </svg>
-            <span class="text-xs font-bold uppercase tracking-wider text-blue-300">Method 1: Direct Google / Fitbit Login</span>
-          </div>
-          <span class="text-[10px] px-2 py-0.5 rounded bg-blue-900/60 text-blue-300 font-mono">No Files Needed</span>
-        </div>
-        <p class="text-xs text-slate-300 leading-relaxed">
-          Connect your Google Fit, Pixel Watch, or Fitbit account via OAuth 2.0 Web API to sync your resting heart rate, cardio points, and VO2 fitness data directly.
-        </p>
-        <div class="flex flex-col sm:flex-row gap-2">
-          <button id="google-login-btn" class="flex-1 py-2 px-3 rounded-lg bg-white hover:bg-slate-100 text-slate-900 text-xs font-semibold shadow flex items-center justify-center gap-2 transition">
-            <svg class="w-4 h-4" viewBox="0 0 24 24">
-              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
-              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
-            </svg>
-            <span>Sign in with Google Health</span>
-          </button>
-          <button id="fitbit-login-btn" class="flex-1 py-2 px-3 rounded-lg bg-[#00B0B9] hover:bg-[#009b9f] text-white text-xs font-semibold shadow flex items-center justify-center gap-2 transition">
-            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.012 3.693a1.44 1.44 0 10-.001-2.88 1.44 1.44 0 00.001 2.88zm0 19.467a1.44 1.44 0 10-.001-2.88 1.44 1.44 0 00.001 2.88zm0-9.734a1.44 1.44 0 100-2.88 1.44 1.44 0 000 2.88z"/></svg>
-            <span>Connect Fitbit Cloud API</span>
-          </button>
-        </div>
-        <div id="oauth-status" class="text-xs text-blue-300 font-mono hidden"></div>
-      </div>
-
-      <!-- METHOD 2: 30-Second Fast Sync (Apple Health, Fitbit, or Samsung Health) -->
-      <div class="space-y-3 p-4 rounded-xl bg-slate-900 border border-slate-800">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Method 2: 30-Second Quick Sync</span>
-          <span class="text-[10px] text-slate-400">Any Device (Apple/Android)</span>
+      <!-- Method 1: type the numbers shown in the app -->
+      <div class="space-y-3 p-3 sm:p-4 rounded-xl bg-slate-900 border border-slate-800">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Option 1 &middot; Type numbers from your app</span>
+          <p class="text-[11px] text-slate-400 mt-1">Open Google Health / Fitbit (or Apple Health), read each value, and type it here. Leave blank anything your device doesn't track.</p>
         </div>
         <div class="grid grid-cols-2 gap-3 text-xs">
-          <div>
-            <label class="text-slate-400 block mb-1">VO2 Max / Cardio Fitness</label>
-            <input type="number" id="quick-input-vo2" step="0.1" placeholder="e.g. 42.5" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-white font-mono text-xs focus:outline-none focus:border-emerald-500">
-          </div>
-          <div>
-            <label class="text-slate-400 block mb-1">Resting Heart Rate (bpm)</label>
-            <input type="number" id="quick-input-rhr" step="1" placeholder="e.g. 62" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-white font-mono text-xs focus:outline-none focus:border-emerald-500">
-          </div>
-          <div>
-            <label class="text-slate-400 block mb-1">Heart Rate Recovery (bpm drop)</label>
-            <input type="number" id="quick-input-hrr" step="1" placeholder="e.g. 26" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-white font-mono text-xs focus:outline-none focus:border-emerald-500">
-          </div>
-          <div>
-            <label class="text-slate-400 block mb-1">Walking Double Support / Steadiness %</label>
-            <input type="number" id="quick-input-ds" step="0.1" placeholder="e.g. 29.5" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-white font-mono text-xs focus:outline-none focus:border-emerald-500">
-          </div>
+          <label class="block col-span-2 sm:col-span-1"><span class="text-slate-400 block mb-1">Source app</span>
+            <select id="m-source" class="w-full px-2.5 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white text-sm">
+              <option>Google Health</option><option>Fitbit</option><option>Pixel Watch</option><option>Apple Health</option><option>Samsung Health</option><option>Other</option>
+            </select></label>
+          <label class="block col-span-2 sm:col-span-1"><span class="text-slate-400 block mb-1">Measured on</span>
+            <input type="date" id="m-date" class="w-full px-2.5 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white text-sm"></label>
+          <label class="block"><span class="text-slate-400 block mb-1">Your age</span>
+            <input type="number" id="m-age" inputmode="decimal" min="18" max="100" step="1" placeholder="e.g. 40" class="w-full px-2.5 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white font-mono text-sm"></label>
+          <label class="block"><span class="text-slate-400 block mb-1">Resting heart rate (bpm)</span>
+            <input type="number" id="m-rhr" inputmode="decimal" step="any" placeholder="e.g. 62" class="w-full px-2.5 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white font-mono text-sm"></label>
+          <label class="block"><span class="text-slate-400 block mb-1">VO2 max / Cardio fitness</span>
+            <input type="number" id="m-vo2" inputmode="decimal" step="any" placeholder="e.g. 42.5" class="w-full px-2.5 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white font-mono text-sm"></label>
+          <label class="block"><span class="text-slate-400 block mb-1">HR recovery, 1 min (bpm drop)</span>
+            <input type="number" id="m-hrr" inputmode="decimal" step="any" placeholder="e.g. 26" class="w-full px-2.5 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white font-mono text-sm"></label>
+          <label class="block"><span class="text-slate-400 block mb-1">Heart rate variability (ms)</span>
+            <input type="number" id="m-hrv" inputmode="decimal" step="any" placeholder="e.g. 48" class="w-full px-2.5 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white font-mono text-sm"></label>
+          <label class="block"><span class="text-slate-400 block mb-1">Walking double support (%)</span>
+            <input type="number" id="m-ds" inputmode="decimal" step="any" placeholder="e.g. 29.5" class="w-full px-2.5 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white font-mono text-sm"></label>
         </div>
-        <button id="apply-quick-sync-btn" class="w-full py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow transition">
-          Apply My Real Numbers to Dashboard
-        </button>
+        <div id="manual-error" class="hidden text-xs text-rose-400"></div>
+        <button id="apply-manual-btn" class="w-full py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold shadow transition">Use these numbers</button>
       </div>
 
-      <!-- METHOD 3: File Drop (Supports Google Takeout CSV/JSON + Apple Health XML) -->
-      <div class="space-y-3 p-4 rounded-xl bg-slate-900 border border-slate-800">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-bold uppercase tracking-wider text-cyan-400">Method 3: Drop Export File (Google Takeout / Apple)</span>
-          <span class="text-[10px] text-slate-400">CSV, JSON, or XML</span>
+      <!-- Method 2: export files -->
+      <div class="space-y-3 p-3 sm:p-4 rounded-xl bg-slate-900 border border-slate-800">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-cyan-400">Option 2 &middot; Import an export file</span>
+          <p class="text-[11px] text-slate-400 mt-1">Apple Health <code class="text-cyan-300">export.xml</code>, or Google Takeout / Fitbit <code class="text-cyan-300">.csv</code> / <code class="text-cyan-300">.json</code> files (you can select several). Unzip archives first. The latest value of each metric found is used.</p>
         </div>
-        <p class="text-xs text-slate-300">
-          Supports <strong>Google Fit Takeout CSV/JSON</strong> (e.g. <code class="text-cyan-300">Daily activity metrics.csv</code>) or <strong>Apple Health</strong> (<code class="text-cyan-300">export.xml</code>):
-        </p>
-        <div class="border-2 border-dashed border-slate-700 hover:border-cyan-500 rounded-xl p-4 text-center cursor-pointer transition" id="drop-zone">
-          <input type="file" id="health-file-input" accept=".xml,.json,.csv,.zip" class="hidden">
-          <svg class="w-7 h-7 mx-auto text-slate-500 mb-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
-          <span class="text-xs text-slate-300 block font-medium">Click to select Google Fit CSV/JSON or Apple XML</span>
-          <span class="text-[10px] text-slate-500">Parsed 100% locally in your browser memory</span>
+        <div id="drop-zone" class="border-2 border-dashed border-slate-700 hover:border-cyan-500 rounded-xl p-4 text-center cursor-pointer transition">
+          <input type="file" id="health-file-input" accept=".xml,.json,.csv" multiple class="hidden">
+          <span class="text-sm text-slate-300 block font-medium">Tap to choose file(s)</span>
+          <span class="text-[10px] text-slate-500">Parsed locally in your browser</span>
         </div>
-        <div id="file-import-status" class="text-xs text-slate-400 hidden"></div>
+        <div id="sync-progress-box" class="hidden space-y-2">
+          <div class="flex items-center justify-between text-xs">
+            <span id="sync-progress-label" class="font-semibold text-white">Reading&hellip;</span>
+            <span id="sync-progress-percent" class="font-mono text-emerald-400 font-bold">0%</span>
+          </div>
+          <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden"><div id="sync-progress-bar" class="bg-gradient-to-r from-blue-500 via-emerald-400 to-cyan-400 h-2 rounded-full transition-all duration-200" style="width:0%"></div></div>
+        </div>
+        <div id="sync-console-log" class="hidden bg-slate-950 rounded-lg p-2.5 font-mono text-[11px] text-slate-300 space-y-1 max-h-32 overflow-y-auto border border-slate-800"></div>
       </div>
 
+      <p class="text-[11px] text-slate-500 leading-relaxed">Why no &ldquo;Sign in with Google&rdquo; button? A static page can't read Health Connect (it lives on your Android phone) and has no secure way to hold Google API credentials, so a button here would only fake it.</p>
     </div>
   </div>
 
