@@ -124,7 +124,7 @@
 
         <button id="open-import-modal-btn" class="px-3 py-2 sm:py-1.5 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 shadow transition flex items-center gap-1.5">
           <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-          <span>Load my data</span>
+          <span>Connect Google Health</span>
         </button>
 
         <button id="export-pdf-header-btn" class="hidden sm:flex px-3 py-1.5 text-xs font-medium rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white shadow transition items-center gap-1.5">
@@ -172,12 +172,16 @@
           <p id="dc-detail" class="text-xs text-slate-400 mt-1"></p>
         </div>
         <div class="flex gap-2 w-full sm:w-auto">
-          <button id="dc-load-btn" class="flex-1 sm:flex-none px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition">Load my data</button>
+          <button id="dc-load-btn" class="flex-1 sm:flex-none px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition">Connect Google Health</button>
           <button id="dc-clear-btn" class="hidden px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-medium transition">Clear</button>
         </div>
       </div>
       <div id="dc-rows" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2"></div>
       <p id="dc-hint" class="text-[11px] text-slate-500 leading-relaxed"></p>
+      <div id="dc-raw" class="hidden">
+        <button id="dc-raw-toggle" class="text-[11px] text-cyan-400 underline">Show raw Google response</button>
+        <pre id="dc-raw-body" class="hidden mt-2 p-2 rounded-lg bg-slate-950 border border-slate-800 text-[10px] text-slate-400 overflow-x-auto max-h-60"></pre>
+      </div>
     </section>
 
     <!-- KPI Summary Cards -->
@@ -927,11 +931,11 @@
       } else if (!loaded) {
         b.className = 'border-b px-3 sm:px-4 py-2 text-xs sm:text-sm bg-slate-900 border-slate-700';
         dot.className = 'mt-1 h-2.5 w-2.5 rounded-full bg-slate-500 shrink-0'; t.className = 'text-slate-300'; t.textContent = 'Actual mode:';
-        setText('mode-banner-text', 'no data loaded yet. Tap "Load my data".');
+        setText('mode-banner-text', 'no data loaded yet. Sign in with Google to pull your numbers.');
       } else {
         b.className = 'border-b px-3 sm:px-4 py-2 text-xs sm:text-sm bg-emerald-950/50 border-emerald-500/30';
         dot.className = 'mt-1 h-2.5 w-2.5 rounded-full bg-emerald-400 shrink-0'; t.className = 'text-emerald-300'; t.textContent = 'Actual mode:';
-        setText('mode-banner-text', `showing your ${loaded} loaded metric${loaded > 1 ? 's' : ''} from ${actual.source || 'your data'}.`);
+        setText('mode-banner-text', `showing your ${loaded} loaded metric${loaded > 1 ? 's' : ''} from ${actual.source || 'Google Health'}.`);
       }
     }
 
@@ -948,12 +952,12 @@
       setText('dc-detail', detail);
       $('dc-clear-btn').classList.toggle('hidden', isDemo || !loaded);
       $('dc-load-btn').classList.toggle('hidden', isDemo && false);
-      $('dc-load-btn').textContent = isDemo ? 'Use my own data' : (loaded ? 'Reload / add data' : 'Load my data');
+      $('dc-load-btn').textContent = isDemo ? 'Connect Google Health' : (gToken() ? 'Refresh from Google' : (loaded ? 'Reconnect Google' : 'Sign in with Google'));
       $('dc-rows').innerHTML = KEYS.map((k) => {
         const m = METRICS[k], val = v[k], meta = actual.meta[k] || {};
         let sub, btn = '';
         if (isDemo) sub = 'simulated';
-        else if (val == null) sub = 'not loaded';
+        else if (val == null) sub = (k === 'hrr' || k === 'ds') ? 'not provided by Google Health' : (actual.errors && actual.errors[k] ? 'Google: ' + esc(actual.errors[k]) : 'not loaded');
         else {
           sub = [meta.date ? esc(String(meta.date).slice(0, 16)) : '', meta.src ? esc(meta.src) : '', meta.n ? meta.n + ' records' : ''].filter(Boolean).join(' • ');
           if (meta.note) sub += `<br><span class="text-yellow-500">${esc(meta.note)}</span>`;
@@ -967,7 +971,7 @@
       }).join('');
       setText('dc-hint', isDemo
         ? 'Demo values are invented so you can explore the app. Nothing here reflects a real person.'
-        : 'To verify: open Google Health (Fitbit or Apple Health), find each metric, and check that the number and date match the card above, then tap "Matches my app?". Cards you didn\'t load stay empty instead of being guessed.');
+        : 'To verify: open the Google Health (Fitbit) app, find each metric, and check that the number and date match the card above, then tap "Matches my app?". Cards you didn\'t load stay empty instead of being guessed.');
     }
 
     function renderKpis() {
@@ -1085,7 +1089,7 @@
 
     function renderAll() {
       res = compute();
-      renderModeUI(); renderDataCheck(); renderKpis(); renderInputs(); renderPillars(); renderInspector(); renderDoc(); updateChart();
+      renderModeUI(); renderDataCheck(); renderKpis(); renderInputs(); renderPillars(); renderInspector(); renderDoc(); updateChart(); renderRaw();
     }
 
     function renderDecadeContent(decade) {
@@ -1125,143 +1129,115 @@
       return keys.length;
     }
 
-    function applyManual() {
-      const err = $('manual-error'); err.classList.add('hidden');
-      const found = {}, src = $('m-source').value, date = $('m-date').value;
-      const ids = { rhr: 'm-rhr', vo2: 'm-vo2', hrr: 'm-hrr', hrv: 'm-hrv', ds: 'm-ds' };
-      for (const k of KEYS) {
-        const raw = $(ids[k]).value.trim(); if (raw === '') continue;
-        const n = parseFloat(raw), m = METRICS[k];
-        if (!isFinite(n) || n < m.min || n > m.max) { err.textContent = `${m.label}: enter a value between ${m.min} and ${m.max} ${m.unit}.`; err.classList.remove('hidden'); return; }
-        found[k] = { value: n, date, src: src + ' (typed)', n: 0 };
+    // ---------- Google Health (OAuth 2.0 implicit flow, browser only) ----------
+    const G_SCOPES = ['https://www.googleapis.com/auth/googlehealth.health_metrics_and_measurements.readonly', 'https://www.googleapis.com/auth/googlehealth.activity_and_fitness.readonly'];
+    const G_BASE = 'https://health.googleapis.com/v4/users/me/dataTypes/';
+    const G_TYPES = { rhr: ['daily-resting-heart-rate'], vo2: ['daily-vo2-max', 'vo2-max'], hrv: ['daily-heart-rate-variability', 'heart-rate-variability'] };
+    const G_PREF = { rhr: /beatsperminute|bpm/i, vo2: /vo2|millilit|mlperkg/i, hrv: /rmssd|millisec|hrv|variab/i };
+    const redirectUri = () => location.origin + location.pathname;
+    let gRaw = {};
+
+    function gToken() {
+      try { const t = JSON.parse(sessionStorage.getItem('decadeshift.gtoken') || 'null'); return t && t.exp > Date.now() ? t.token : null; } catch (e) { return null; }
+    }
+    function gStart() {
+      const err = $('g-error'); err.classList.add('hidden');
+      const cid = $('g-client-id').value.trim();
+      if (!/\.apps\.googleusercontent\.com$/.test(cid)) { err.textContent = 'Paste the OAuth Client ID from Google Cloud (ends in .apps.googleusercontent.com).'; err.classList.remove('hidden'); return; }
+      if (location.protocol === 'file:') { err.textContent = 'Google sign-in cannot run from a local file. Open the hosted page instead.'; err.classList.remove('hidden'); return; }
+      try { localStorage.setItem('decadeshift.cid', cid); } catch (e) {}
+      const state = Math.random().toString(36).slice(2) + Date.now().toString(36);
+      try { sessionStorage.setItem('decadeshift.gstate', state); } catch (e) {}
+      const q = new URLSearchParams({ client_id: cid, redirect_uri: redirectUri(), response_type: 'token', scope: G_SCOPES.join(' '), state, include_granted_scopes: 'true', prompt: 'consent' });
+      location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + q;
+    }
+    function gHandleRedirect() {
+      if (!location.hash.includes('access_token') && !location.hash.includes('error=')) return false;
+      const h = new URLSearchParams(location.hash.slice(1));
+      history.replaceState(null, '', location.pathname + location.search);
+      let ok = false; try { ok = h.get('state') && h.get('state') === sessionStorage.getItem('decadeshift.gstate'); } catch (e) {}
+      if (h.get('error')) { showToast('Google sign-in failed: ' + h.get('error')); return false; }
+      if (!ok) { showToast('Sign-in response rejected (state mismatch).'); return false; }
+      try { sessionStorage.setItem('decadeshift.gtoken', JSON.stringify({ token: h.get('access_token'), exp: Date.now() + (parseInt(h.get('expires_in'), 10) || 3600) * 1000 - 30000 })); } catch (e) {}
+      return true;
+    }
+
+    // Walk one data point; return {num, date}. Field names are matched defensively because the API is new.
+    function leaves(o, path, out) {
+      if (Array.isArray(o)) { o.forEach((x) => leaves(x, path, out)); return out; }
+      if (o && typeof o === 'object') { for (const [k, v] of Object.entries(o)) leaves(v, path.concat(k), out); return out; }
+      out.push([path, o]); return out;
+    }
+    function pointInfo(p, k) {
+      const L = leaves(p, [], []); let date = '', num = null;
+      const ymd = {}; 
+      for (const [path, v] of L) {
+        const key = path[path.length - 1] || '', full = path.join('.');
+        if (/^(year|month|day)$/i.test(key) && /date/i.test(full)) ymd[key.toLowerCase()] = v;
+        else if (/date|time/i.test(full) && typeof v === 'string' && !date) date = v;
       }
-      const ageRaw = $('m-age').value.trim(), age = ageRaw === '' ? null : parseFloat(ageRaw);
-      if (age !== null && (!isFinite(age) || age < 18 || age > 100)) { err.textContent = 'Age must be between 18 and 100.'; err.classList.remove('hidden'); return; }
-      if (!Object.keys(found).length) { err.textContent = 'Enter at least one metric.'; err.classList.remove('hidden'); return; }
-      const n = applyResults(found, src, age);
-      closeModal(); showToast(`Loaded ${n} metric${n > 1 ? 's' : ''}. Compare them with your app below.`);
-      $('data-check').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (ymd.year) date = `${ymd.year}-${String(ymd.month).padStart(2, '0')}-${String(ymd.day).padStart(2, '0')}`;
+      const nums = L.filter(([path, v]) => !/date|time|year|month|day|name|id$/i.test(path.join('.')) && isFinite(parseFloat(v)) && v !== '' && typeof v !== 'boolean');
+      const pref = nums.find(([path]) => G_PREF[k].test(path.join('.')));
+      const pick = pref || nums[0];
+      if (pick) num = parseFloat(pick[1]);
+      return { num, date };
     }
 
-    // ---------- File parsing ----------
-    const APPLE_TYPES = { RestingHeartRate: 'rhr', VO2Max: 'vo2', HeartRateRecoveryOneMinute: 'hrr', HeartRateVariabilitySDNN: 'hrv', AppleWalkingDoubleSupportPercentage: 'ds' };
-
-    function toNum(x) {
-      if (typeof x === 'number') return isFinite(x) ? x : null;
-      if (typeof x !== 'string') return null;
-      const r = x.trim().match(/^(\d+(?:\.\d+)?)\s*[-–]\s*(\d+(?:\.\d+)?)$/);
-      if (r) return (parseFloat(r[1]) + parseFloat(r[2])) / 2;
-      const m = x.match(/-?\d+(?:\.\d+)?/);
-      return m ? parseFloat(m[0]) : null;
-    }
-    function collector() {
-      const best = {};
-      return { best, add(k, raw, date, order) {
-        const m = METRICS[k]; let val = raw;
-        if (k === 'ds' && val > 0 && val <= 1) val *= 100;
-        if (val == null || val < m.min || val > m.max) return;
-        const ts = Date.parse(date); const key = isNaN(ts) ? order : ts;
-        const b = best[k] || (best[k] = { n: 0, key: -Infinity });
-        b.n++;
-        if (key >= b.key) { b.key = key; b.value = val; b.date = date || ''; }
-      } };
+    async function gFetchType(k, token) {
+      let last = null;
+      for (const t of G_TYPES[k]) {
+        const r = await fetch(`${G_BASE}${t}/dataPoints?pageSize=30`, { headers: { Authorization: 'Bearer ' + token } });
+        const body = await r.text(); gRaw[k] = { type: t, status: r.status, body: body.slice(0, 4000) };
+        if (r.status === 401) throw Object.assign(new Error('expired'), { code: 401 });
+        if (!r.ok) { last = `${r.status} ${t}`; continue; }
+        let j; try { j = JSON.parse(body); } catch (e) { last = 'bad JSON'; continue; }
+        const pts = (j.dataPoints || []).map((p) => pointInfo(p, k)).filter((x) => x.num != null && x.num >= METRICS[k].min && x.num <= METRICS[k].max);
+        if (!pts.length) { last = `no data points in ${t}`; continue; }
+        pts.sort((a, b) => (Date.parse(a.date) || 0) - (Date.parse(b.date) || 0));
+        const best = pts[pts.length - 1];
+        return { value: best.num, date: best.date, n: pts.length, src: 'Google Health API' };
+      }
+      return { error: last || 'no data' };
     }
 
-    async function parseApple(file, col, onProgress) {
-      const re = /<Record\s[^>]*>/g;
-      const handle = (s) => {
-        for (const mt of s.matchAll(re)) {
-          const tag = mt[0], t = /type="HK(?:Quantity|Category)TypeIdentifier([^"]+)"/.exec(tag);
-          const k = t && APPLE_TYPES[t[1]]; if (!k) continue;
-          const val = parseFloat((/value="([^"]*)"/.exec(tag) || [])[1]);
-          const dt = (/startDate="([^"]*)"/.exec(tag) || [])[1] || '';
-          if (!isNaN(val)) col.add(k, val, dt.replace(' ', 'T').replace(/ ([+-]\d\d)(\d\d)$/, '$1:$2'), 0);
+    async function gSync() {
+      const token = gToken();
+      if (!token) { openModal(); return; }
+      setText('dc-detail', 'Fetching from Google Health…'); mode = 'actual';
+      const found = {}, errors = {};
+      gRaw = {};
+      try {
+        for (const k of Object.keys(G_TYPES)) {
+          const r = await gFetchType(k, token);
+          if (r.error) errors[k] = r.error; else found[k] = r;
         }
-      };
-      if (!file.stream) { handle(await file.text()); return; }
-      const reader = file.stream().getReader(), dec = new TextDecoder(); let buf = '', read = 0;
-      for (;;) {
-        const { done, value } = await reader.read(); if (done) break;
-        read += value.length; buf += dec.decode(value, { stream: true });
-        const i = buf.lastIndexOf('>'); if (i >= 0) { handle(buf.slice(0, i + 1)); buf = buf.slice(i + 1); }
-        onProgress(read / file.size);
+      } catch (e) {
+        if (e.code === 401) { try { sessionStorage.removeItem('decadeshift.gtoken'); } catch (x) {} showToast('Google session expired. Sign in again.'); openModal(); }
+        else showToast('Could not reach Google Health: ' + e.message + ' (browser blocked the request?)');
+        actual.errors = { all: e.message }; persist(); renderAll(); return;
       }
-      handle(buf);
+      // Replace Google-sourced metrics wholesale so stale values never linger.
+      Object.keys(G_TYPES).forEach((k) => { actual.vals[k] = null; delete actual.meta[k]; actual.confirmed[k] = false; });
+      actual.errors = errors;
+      const n = applyResults(found, 'Google Health', null);
+      if (!n) { actual.loadedAt = Date.now(); persist(); renderAll(); }
+      showToast(n ? `Loaded ${n} metric${n > 1 ? 's' : ''} from Google Health. Compare them with your app.` : 'Signed in, but Google returned no usable data. See raw response below.');
+      renderRaw();
     }
 
-    function parseCsvLine(l) {
-      const out = []; let c = '', q = false;
-      for (const ch of l) { if (ch === '"') q = !q; else if (ch === ',' && !q) { out.push(c); c = ''; } else c += ch; }
-      out.push(c); return out;
-    }
-    function parseCsv(text, col) {
-      const lines = text.split(/\r?\n/).filter((l) => l.trim());
-      if (lines.length < 2) return;
-      const head = parseCsvLine(lines[0]).map((h) => h.trim());
-      const dateIdx = head.findIndex((h) => /date|time|day/i.test(h));
-      const colKey = head.map((h) => KEYS.find((k) => METRICS[k].pat.test(h)) || null);
-      for (let i = 1; i < lines.length; i++) {
-        const cells = parseCsvLine(lines[i]), date = dateIdx >= 0 ? cells[dateIdx] : '';
-        colKey.forEach((k, j) => { if (k) { const n = toNum(cells[j]); if (n != null) col.add(k, n, date, i); } });
-      }
-    }
-    function parseJson(text, fileName, col) {
-      const fileMetric = KEYS.find((k) => METRICS[k].pat.test(fileName)) || null;
-      let order = 0;
-      const walk = (o, date) => {
-        if (Array.isArray(o)) { o.forEach((x) => walk(x, date)); return; }
-        if (!o || typeof o !== 'object') return;
-        for (const [k, v] of Object.entries(o)) if (/date|time/i.test(k) && typeof v === 'string') { date = v; break; }
-        for (const [k, v] of Object.entries(o)) {
-          const mk = KEYS.find((x) => METRICS[x].pat.test(k)) || (k === 'value' ? fileMetric : null);
-          if (mk) {
-            const raw = v && typeof v === 'object' && !Array.isArray(v) ? (v.value ?? v.rmssd ?? v.filteredDemographicVo2Max ?? v.demographicVo2Max ?? v.vo2Max) : v;
-            const n = toNum(raw);
-            if (n != null) { col.add(mk, n, date, order++); continue; }
-          }
-          if (v && typeof v === 'object') walk(v, date);
-        }
-      };
-      walk(JSON.parse(text), '');
-    }
-
-    async function importFiles(files) {
-      const box = $('sync-progress-box'), bar = $('sync-progress-bar'), logEl = $('sync-console-log');
-      box.classList.remove('hidden'); logEl.classList.remove('hidden'); logEl.innerHTML = '';
-      const log = (msg, bad) => { const r = document.createElement('div'); r.textContent = '> ' + msg; if (bad) r.className = 'text-rose-400'; logEl.appendChild(r); logEl.scrollTop = logEl.scrollHeight; };
-      const prog = (p, label) => { const pc = Math.round(p * 100); bar.style.width = pc + '%'; setText('sync-progress-percent', pc + '%'); if (label) setText('sync-progress-label', label); };
-      const col = collector(); let sawApple = false;
-      for (let i = 0; i < files.length; i++) {
-        const f = files[i], base = i / files.length, span = 1 / files.length;
-        prog(base, `Reading ${f.name}`); log(`Reading ${f.name} (${(f.size / 1048576).toFixed(1)} MB)`);
-        try {
-          const lower = f.name.toLowerCase();
-          if (lower.endsWith('.xml')) { sawApple = true; await parseApple(f, col, (p) => prog(base + p * span)); }
-          else {
-            const text = await f.text();
-            if (lower.endsWith('.csv')) parseCsv(text, col); else if (lower.endsWith('.json')) parseJson(text, f.name, col); else throw new Error('unsupported file type');
-          }
-        } catch (e) { log(`${f.name}: could not be parsed (${e.message})`, true); }
-      }
-      prog(1, 'Done');
-      const found = {};
-      KEYS.forEach((k) => {
-        const b = col.best[k]; if (!b) return;
-        found[k] = { value: b.value, date: b.date, n: b.n, src: 'file' };
-        if (k === 'hrv' && sawApple) found[k].note = 'Apple reports SDNN, not rMSSD';
-        log(`${METRICS[k].label}: ${fmt(b.value)} ${METRICS[k].unit} (${String(b.date).slice(0, 10) || 'no date'}, ${b.n} records)`);
-      });
-      const names = files.map((f) => f.name).join(', ');
-      const n = applyResults(found, sawApple ? 'Apple Health export' : 'Imported file', null);
-      if (!n) { log('No recognizable metrics found. Nothing was changed.', true); return; }
-      log(`Loaded ${n} of 5 metrics. Missing ones stay empty.`);
-      setTimeout(() => { closeModal(); showToast(`Loaded ${n} metric${n > 1 ? 's' : ''} from ${files.length} file${files.length > 1 ? 's' : ''}. Compare them with your app.`); $('data-check').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 1500);
+    function renderRaw() {
+      const box = $('dc-raw'); if (!box) return;
+      const keys = Object.keys(gRaw);
+      box.classList.toggle('hidden', mode === 'demo' || !keys.length);
+      $('dc-raw-body').textContent = keys.map((k) => `# ${k}: GET ${gRaw[k].type} -> HTTP ${gRaw[k].status}\n${gRaw[k].body}`).join('\n\n');
     }
 
     // ---------- Wiring ----------
     window.addEventListener('DOMContentLoaded', () => {
       restore(); loadProfile(demo.profile);
-      $('m-date').value = new Date().toISOString().slice(0, 10);
+      $('g-origin').textContent = location.origin; $('g-redirect').textContent = redirectUri();
+      try { $('g-client-id').value = localStorage.getItem('decadeshift.cid') || ''; } catch (e) {}
 
       document.querySelectorAll('.nav-tab').forEach((btn) => btn.addEventListener('click', () => {
         document.querySelectorAll('.nav-tab').forEach((b) => { b.classList.remove('tab-active'); b.classList.add('text-slate-400'); });
@@ -1291,13 +1267,12 @@
       Object.entries(sliders).forEach(([k, [id, parse]]) => $(id).addEventListener('input', (e) => { if (mode !== 'demo') return; demo.vals[k] = parse(e.target.value); renderAll(); }));
 
       $('open-import-modal-btn').addEventListener('click', openModal);
-      $('dc-load-btn').addEventListener('click', openModal);
+      $('dc-load-btn').addEventListener('click', () => (gToken() ? gSync() : openModal()));
+      $('dc-raw-toggle').addEventListener('click', () => $('dc-raw-body').classList.toggle('hidden'));
       $('close-import-modal-btn').addEventListener('click', closeModal);
       $('import-modal').addEventListener('click', (e) => { if (e.target === $('import-modal')) closeModal(); });
       document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
-      $('apply-manual-btn').addEventListener('click', applyManual);
-      $('drop-zone').addEventListener('click', () => $('health-file-input').click());
-      $('health-file-input').addEventListener('change', (e) => { const fl = Array.from(e.target.files); e.target.value = ''; if (fl.length) importFiles(fl); });
+      $('google-signin-btn').addEventListener('click', gStart);
 
       $('dc-rows').addEventListener('click', (e) => {
         const b = e.target.closest('[data-confirm]'); if (!b) return;
@@ -1312,74 +1287,46 @@
       renderDecadeContent(40);
       initChart();
       renderAll();
+      if (gHandleRedirect()) gSync();
     });
   </script>
 
-  <!-- Load-my-data modal -->
+  <!-- Connect Google Health modal -->
   <div id="import-modal" role="dialog" aria-modal="true" aria-labelledby="import-title" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/80 backdrop-blur-sm hidden">
     <div class="glass-card bg-slate-950 border-slate-700 sm:rounded-2xl rounded-t-2xl max-w-xl w-full p-4 sm:p-6 space-y-4 shadow-2xl overflow-y-auto max-h-[92vh]">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
         <div>
-          <h3 id="import-title" class="text-base font-bold text-white">Load my data</h3>
-          <p class="text-xs text-slate-400">Numbers stay in this browser. Nothing is uploaded.</p>
+          <h3 id="import-title" class="text-base font-bold text-white">Connect Google Health</h3>
+          <p class="text-xs text-slate-400">Read-only. Your data goes from Google straight to this browser tab.</p>
         </div>
         <button id="close-import-modal-btn" aria-label="Close" class="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
       </div>
 
-      <!-- Method 1: type the numbers shown in the app -->
       <div class="space-y-3 p-3 sm:p-4 rounded-xl bg-slate-900 border border-slate-800">
-        <div>
-          <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Option 1 &middot; Type numbers from your app</span>
-          <p class="text-[11px] text-slate-400 mt-1">Open Google Health / Fitbit (or Apple Health), read each value, and type it here. Leave blank anything your device doesn't track.</p>
+        <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">One-time setup (about 5 minutes)</span>
+        <ol class="text-xs text-slate-300 space-y-1.5 list-decimal list-inside leading-relaxed">
+          <li>In <strong>Google Cloud Console</strong>, create a project and enable the <strong>Google Health API</strong>.</li>
+          <li><strong>OAuth consent screen</strong>: add your Google account as a <em>test user</em> and add the two scopes below.</li>
+          <li><strong>Credentials &rarr; OAuth client ID &rarr; Web application</strong>. Add the origin and redirect URI shown below.</li>
+          <li>Paste the Client ID here and sign in.</li>
+        </ol>
+        <div class="text-[11px] text-slate-400 space-y-1">
+          <div>Authorized JavaScript origin: <code id="g-origin" class="text-cyan-300 break-all"></code></div>
+          <div>Authorized redirect URI: <code id="g-redirect" class="text-cyan-300 break-all"></code></div>
+          <div>Scopes: <code class="text-cyan-300 break-all">googlehealth.health_metrics_and_measurements.readonly</code>, <code class="text-cyan-300 break-all">googlehealth.activity_and_fitness.readonly</code></div>
         </div>
-        <div class="grid grid-cols-2 gap-3 text-xs">
-          <label class="block col-span-2 sm:col-span-1"><span class="text-slate-400 block mb-1">Source app</span>
-            <select id="m-source" class="w-full px-2.5 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white text-sm">
-              <option>Google Health</option><option>Fitbit</option><option>Pixel Watch</option><option>Apple Health</option><option>Samsung Health</option><option>Other</option>
-            </select></label>
-          <label class="block col-span-2 sm:col-span-1"><span class="text-slate-400 block mb-1">Measured on</span>
-            <input type="date" id="m-date" class="w-full px-2.5 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white text-sm"></label>
-          <label class="block"><span class="text-slate-400 block mb-1">Your age</span>
-            <input type="number" id="m-age" inputmode="decimal" min="18" max="100" step="1" placeholder="e.g. 40" class="w-full px-2.5 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white font-mono text-sm"></label>
-          <label class="block"><span class="text-slate-400 block mb-1">Resting heart rate (bpm)</span>
-            <input type="number" id="m-rhr" inputmode="decimal" step="any" placeholder="e.g. 62" class="w-full px-2.5 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white font-mono text-sm"></label>
-          <label class="block"><span class="text-slate-400 block mb-1">VO2 max / Cardio fitness</span>
-            <input type="number" id="m-vo2" inputmode="decimal" step="any" placeholder="e.g. 42.5" class="w-full px-2.5 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white font-mono text-sm"></label>
-          <label class="block"><span class="text-slate-400 block mb-1">HR recovery, 1 min (bpm drop)</span>
-            <input type="number" id="m-hrr" inputmode="decimal" step="any" placeholder="e.g. 26" class="w-full px-2.5 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white font-mono text-sm"></label>
-          <label class="block"><span class="text-slate-400 block mb-1">Heart rate variability (ms)</span>
-            <input type="number" id="m-hrv" inputmode="decimal" step="any" placeholder="e.g. 48" class="w-full px-2.5 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white font-mono text-sm"></label>
-          <label class="block"><span class="text-slate-400 block mb-1">Walking double support (%)</span>
-            <input type="number" id="m-ds" inputmode="decimal" step="any" placeholder="e.g. 29.5" class="w-full px-2.5 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white font-mono text-sm"></label>
-        </div>
-        <div id="manual-error" class="hidden text-xs text-rose-400"></div>
-        <button id="apply-manual-btn" class="w-full py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold shadow transition">Use these numbers</button>
+        <label class="block text-xs"><span class="text-slate-400 block mb-1">Google OAuth Client ID</span>
+          <input id="g-client-id" type="text" autocomplete="off" spellcheck="false" placeholder="1234567890-abc.apps.googleusercontent.com" class="w-full px-2.5 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white font-mono text-xs"></label>
+        <div id="g-error" class="hidden text-xs text-rose-400"></div>
+        <button id="google-signin-btn" class="w-full py-2.5 rounded-lg bg-white hover:bg-slate-100 text-slate-900 text-sm font-semibold shadow flex items-center justify-center gap-2 transition">
+          <svg class="w-4 h-4" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/></svg>
+          <span>Sign in with Google</span>
+        </button>
       </div>
 
-      <!-- Method 2: export files -->
-      <div class="space-y-3 p-3 sm:p-4 rounded-xl bg-slate-900 border border-slate-800">
-        <div>
-          <span class="text-xs font-bold uppercase tracking-wider text-cyan-400">Option 2 &middot; Import an export file</span>
-          <p class="text-[11px] text-slate-400 mt-1">Apple Health <code class="text-cyan-300">export.xml</code>, or Google Takeout / Fitbit <code class="text-cyan-300">.csv</code> / <code class="text-cyan-300">.json</code> files (you can select several). Unzip archives first. The latest value of each metric found is used.</p>
-        </div>
-        <div id="drop-zone" class="border-2 border-dashed border-slate-700 hover:border-cyan-500 rounded-xl p-4 text-center cursor-pointer transition">
-          <input type="file" id="health-file-input" accept=".xml,.json,.csv" multiple class="hidden">
-          <span class="text-sm text-slate-300 block font-medium">Tap to choose file(s)</span>
-          <span class="text-[10px] text-slate-500">Parsed locally in your browser</span>
-        </div>
-        <div id="sync-progress-box" class="hidden space-y-2">
-          <div class="flex items-center justify-between text-xs">
-            <span id="sync-progress-label" class="font-semibold text-white">Reading&hellip;</span>
-            <span id="sync-progress-percent" class="font-mono text-emerald-400 font-bold">0%</span>
-          </div>
-          <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden"><div id="sync-progress-bar" class="bg-gradient-to-r from-blue-500 via-emerald-400 to-cyan-400 h-2 rounded-full transition-all duration-200" style="width:0%"></div></div>
-        </div>
-        <div id="sync-console-log" class="hidden bg-slate-950 rounded-lg p-2.5 font-mono text-[11px] text-slate-300 space-y-1 max-h-32 overflow-y-auto border border-slate-800"></div>
-      </div>
-
-      <p class="text-[11px] text-slate-500 leading-relaxed">Why no &ldquo;Sign in with Google&rdquo; button? A static page can't read Health Connect (it lives on your Android phone) and has no secure way to hold Google API credentials, so a button here would only fake it.</p>
+      <p class="text-[11px] text-slate-500 leading-relaxed">Sign-in needs a stable web address (for example GitHub Pages), not a local file. Google Health provides resting heart rate, VO2 max and HRV. Heart rate recovery and walking double support are not available from it, so they stay empty.</p>
     </div>
   </div>
 
